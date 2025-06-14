@@ -21,33 +21,26 @@ const generateLayoutItem = (
   existingLayout: Layout[] = []
 ): Layout => {
   const aspectRatio = image.width / image.height;
-  // Approximate column width for 'lg' breakpoint (1200px wide container, 10px margin between columns)
   const approximateColWidthLg = (1200 - (COLS.lg + 1) * 10) / COLS.lg; 
   const estimatedPixelWidth = DEFAULT_ITEM_WIDTH * approximateColWidthLg;
   const estimatedPixelHeight = estimatedPixelWidth / aspectRatio;
   
-  // Calculate height in terms of rowHeight units (each row is rowHeight + margin)
-  const h = Math.max(2, Math.ceil(estimatedPixelHeight / (DEFAULT_ROW_HEIGHT + 10 ))); // Add 10 for margin
+  const h = Math.max(2, Math.ceil(estimatedPixelHeight / (DEFAULT_ROW_HEIGHT + 10 )));
 
-
-  // Basic Y positioning: find the bottom of the lowest item.
   let yPos = 0;
   if (existingLayout.length > 0) {
     yPos = Math.max(...existingLayout.map(item => item.y + item.h), 0);
   }
   
-  // Basic X positioning: try to fit in the current 'bottom-most' row.
   const itemsInCurrentPotentialRow = existingLayout.filter(item => item.y === yPos);
   let xPos = 0;
   if(itemsInCurrentPotentialRow.length > 0){
-    // Sum of widths of items in the current potential row, modulo COLS.lg
     xPos = itemsInCurrentPotentialRow.reduce((sum, item) => sum + item.w, 0) % COLS.lg;
   }
  
-  // If it doesn't fit horizontally, move to the next row.
   if (xPos + DEFAULT_ITEM_WIDTH > COLS.lg) {
-    yPos = yPos + Math.max(...itemsInCurrentPotentialRow.map(i => i.h), h); // Start new row below the tallest item in current row or current item height
-    xPos = 0; // Reset x to the beginning of the row
+    yPos = yPos + Math.max(...itemsInCurrentPotentialRow.map(i => i.h), h); 
+    xPos = 0; 
   }
 
   return {
@@ -75,7 +68,6 @@ const initialImages: UploadedImage[] = defaultImagesSeed.map((img, index) => ({
   type: 'image/jpeg', 
 }));
 
-// Calculate initial layouts for the 'lg' breakpoint
 let tempCurrentLayoutForInit: Layout[] = [];
 const initialLayoutsLg: Layout[] = initialImages.map(img => {
   const layoutItem = generateLayoutItem(img, tempCurrentLayoutForInit);
@@ -104,12 +96,10 @@ export default function IGalleryPage() {
       document.documentElement.classList.add('dark');
     }
 
-    // This logic is to re-initialize default images if for some reason they are cleared
-    // and the component re-mounts or state is lost without a full reload.
     if (images.length === 0 && (!layouts.lg || layouts.lg.length === 0) && !defaultsInitializedRef.current) {
         const derivedInitialImages: UploadedImage[] = defaultImagesSeed.map((img, index) => ({
             ...img,
-            id: `default-image-reinit-${index + 1}`, // Ensure unique IDs if re-initializing
+            id: `default-image-reinit-${index + 1}`, 
             type: 'image/jpeg',
         }));
         
@@ -121,18 +111,17 @@ export default function IGalleryPage() {
         });
         setImages(derivedInitialImages);
         setLayouts({ lg: derivedInitialLayoutsLg });
-        defaultsInitializedRef.current = true; // Mark as re-initialized to prevent loops
+        defaultsInitializedRef.current = true; 
     }
-  }, []); // Empty dependency array means this runs once on mount
+  }, []); 
 
 
   const calculateInitialLayoutItem = useCallback((
     image: UploadedImage,
-    existingLayout: Layout[] = [] // Pass the current layout to allow proper stacking
+    existingLayout: Layout[] = [] 
   ): Layout => {
-    // This function now directly calls the globally defined generateLayoutItem
     return generateLayoutItem(image, existingLayout);
-  }, []); // No dependencies as generateLayoutItem is stable based on its definition
+  }, []); 
 
 
   const toggleTheme = () => {
@@ -145,7 +134,6 @@ export default function IGalleryPage() {
   const handleUploads = useCallback((newImages: UploadedImage[]) => {
     setImages(prevImages => {
       const updatedImages = [...prevImages];
-      // Ensure we only add images that are not already present by ID
       const uniqueNewImages = newImages.filter(img => !prevImages.some(pi => pi.id === img.id));
       updatedImages.push(...uniqueNewImages);
       return updatedImages;
@@ -153,27 +141,18 @@ export default function IGalleryPage() {
 
     setLayouts(prevLayouts => {
       const newLayoutsState: Layouts = { ...prevLayouts };
-      
-      // Use a temporary copy of the current 'lg' layout for calculating positions of new items
-      // This ensures new items are stacked correctly based on the most up-to-date layout.
       let currentLgLayoutForNewItemsCalculation = newLayoutsState.lg ? [...newLayoutsState.lg] : [];
-
       const itemsLayoutToAdd: Layout[] = [];
       newImages.forEach(img => {
-        // Check if a layout item for this image already exists
         if (!currentLgLayoutForNewItemsCalculation.find(item => item.i === img.id)) {
             const newLayoutItem = calculateInitialLayoutItem(img, currentLgLayoutForNewItemsCalculation);
             itemsLayoutToAdd.push(newLayoutItem);
-            // Add the new item to our temporary layout to correctly position subsequent new items
             currentLgLayoutForNewItemsCalculation.push(newLayoutItem); 
         }
       });
       
       if (!newLayoutsState.lg) newLayoutsState.lg = [];
       newLayoutsState.lg = [...newLayoutsState.lg, ...itemsLayoutToAdd];
-      
-      // For other breakpoints, ResponsiveGridLayout will attempt to adapt from 'lg' if they don't exist
-      // or you can implement logic to generate them specifically here if needed.
       return newLayoutsState;
     });
   }, [calculateInitialLayoutItem]);
@@ -348,7 +327,7 @@ export default function IGalleryPage() {
                 </Button>
               </DialogClose>
 
-              <div className="relative flex items-center justify-center w-full flex-grow mb-4">
+              <div className="relative flex items-center justify-center w-full flex-grow mb-4 overflow-hidden">
                 {images.length > 1 && (
                   <Button
                     variant="ghost"
@@ -361,14 +340,24 @@ export default function IGalleryPage() {
                   </Button>
                 )}
 
-                <div className="relative w-full max-w-3xl lg:max-w-4xl xl:max-w-5xl h-full max-h-[70vh] sm:max-h-[75vh] flex items-center justify-center bg-black/5 dark:bg-white/5 backdrop-blur-sm rounded-xl shadow-2xl p-3 border border-white/10 dark:border-black/10">
+                <div
+                  className={cn(
+                    "relative inline-block max-w-full max-h-[calc(100vh_-_12rem)]", // Adjust 12rem based on actual header/footer/thumbnail height
+                    "bg-black/5 dark:bg-white/5 backdrop-blur-sm rounded-xl shadow-2xl p-3",
+                    "border border-white/10 dark:border-black/10"
+                  )}
+                >
                   <Image
+                    key={previewImage.id}
                     src={previewImage.src}
                     alt={previewImage.name}
-                    fill
-                    className="object-contain rounded-lg"
+                    width={previewImage.width}
+                    height={previewImage.height}
+                    className="block object-contain rounded-lg max-w-full max-h-full"
+                    sizes="(max-width: 640px) 90vw, (max-width: 1024px) 70vw, 1000px"
                     data-ai-hint={previewImage.aiHint}
                     unoptimized 
+                    priority={currentPreviewIndex === images.findIndex(img => img.id === previewImage.id)}
                   />
                 </div>
 
