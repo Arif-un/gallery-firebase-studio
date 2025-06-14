@@ -12,7 +12,7 @@ export default {
       fontFamily: {
         body: ['Inter', 'sans-serif'],
         headline: ['Inter', 'sans-serif'],
-        code: ['monospace'],
+        code: ['monospace', 'monospace'],
       },
       colors: {
         background: 'hsl(var(--background))',
@@ -70,6 +70,8 @@ export default {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+        xl: 'calc(var(--radius) + 4px)', // For iOS style cards
+        '2xl': 'calc(var(--radius) + 8px)',
       },
       keyframes: {
         'accordion-down': {
