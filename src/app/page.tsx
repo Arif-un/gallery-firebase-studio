@@ -60,6 +60,11 @@ const defaultImagesSeed: Omit<UploadedImage, 'id' | 'type'>[] = [
   { src: 'https://images.pexels.com/photos/1450360/pexels-photo-1450360.jpeg?auto=compress&cs=tinysrgb&w=1200', name: 'Beach Overhead', width: 1200, height: 800, aiHint: 'beach aerial' },
   { src: 'https://images.pexels.com/photos/1526713/pexels-photo-1526713.jpeg?auto=compress&cs=tinysrgb&w=1200', name: 'Coastal Trees', width: 1200, height: 800, aiHint: 'coast trees' },
   { src: 'https://images.pexels.com/photos/1809644/pexels-photo-1809644.jpeg?auto=compress&cs=tinysrgb&w=1200', name: 'River Bend Forest', width: 1200, height: 800, aiHint: 'river forest' },
+  { src: 'https://images.pexels.com/photos/40465/pexels-photo-40465.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2', name: 'Butterfly Flower', width: 1260, height: 750, aiHint: 'butterfly flower' },
+  { src: 'https://images.pexels.com/photos/32289220/pexels-photo-32289220/free-photo-of-traditional-blue-door-in-tunisian-architecture.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2', name: 'Blue Door Tunisia', width: 1260, height: 750, aiHint: 'blue door' },
+  { src: 'https://images.pexels.com/photos/2884867/pexels-photo-2884867.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2', name: 'Forest Path Sunlight', width: 1260, height: 750, aiHint: 'forest path' },
+  { src: 'https://images.pexels.com/photos/1535162/pexels-photo-1535162.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2', name: 'Mountain Starry Sky', width: 1260, height: 750, aiHint: 'mountain sky' },
+  { src: 'https://images.pexels.com/photos/1226302/pexels-photo-1226302.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2', name: 'Desert Dunes Sunset', width: 1260, height: 750, aiHint: 'desert dunes' },
 ];
 
 const initialImages: UploadedImage[] = defaultImagesSeed.map((img, index) => ({
@@ -338,11 +343,9 @@ export default function IGalleryPage() {
                   </Button>
                 )}
 
-                {/* Outer Sizing Wrapper */}
-                <div className="relative w-3/4 max-h-[calc(100vh_-_12rem)]"> {/* Width 75%, max height constrained */}
-                  {/* Inner Styled Wrapper (New) */}
+                <div className="relative w-3/4 max-h-[calc(100vh_-_12rem)]">
                   <div className={cn(
-                    "relative w-full h-auto p-2 rounded-xl overflow-hidden", // h-auto to wrap image content
+                    "relative w-full h-auto p-2 rounded-xl overflow-hidden",
                     "bg-black/20 dark:bg-white/10 backdrop-blur-md", 
                     "shadow-2xl border border-white/5" 
                   )}>
