@@ -1,16 +1,16 @@
+
 "use client";
 
 import React, { useEffect, useMemo } from 'react';
 import Uppy from '@uppy/core';
 import { Dashboard } from '@uppy/react';
-import DragDrop from '@uppy/drag-drop';
-import FileInput from '@uppy/file-input';
+// Import plugins that are NOT managed by Dashboard's 'plugins' prop directly here if needed for Uppy core instance
 import ProgressBar from '@uppy/progress-bar';
+import Url from '@uppy/url';
 import GoogleDrive from '@uppy/google-drive';
 import Dropbox from '@uppy/dropbox';
 import Instagram from '@uppy/instagram';
-import Url from '@uppy/url';
-import Webcam from '@uppy/webcam';
+import Webcam from '@uppy/webcam'; // Keep for type, Dashboard will init
 
 import type { UploadedImage } from '@/types';
 import { useToast } from '@/hooks/use-toast';
@@ -18,11 +18,11 @@ import { useToast } from '@/hooks/use-toast';
 // Import Uppy CSS
 import '@uppy/core/dist/style.min.css';
 import '@uppy/dashboard/dist/style.min.css';
-import '@uppy/drag-drop/dist/style.min.css';
-import '@uppy/file-input/dist/style.min.css';
+import '@uppy/drag-drop/dist/style.min.css'; // Dashboard will handle DragDrop UI
+import '@uppy/file-input/dist/style.min.css'; // Dashboard will handle FileInput UI
 import '@uppy/progress-bar/dist/style.min.css';
 import '@uppy/url/dist/style.min.css';
-import '@uppy/webcam/dist/style.min.css';
+import '@uppy/webcam/dist/style.min.css'; // Dashboard will handle Webcam UI
 
 
 interface ImageUploaderProps {
@@ -43,26 +43,21 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onUploadComplete }) => {
       },
     });
 
+    // Plugins managed by Dashboard (DragDrop, FileInput, Webcam) are specified in Dashboard's `plugins` prop.
+    // Only initialize plugins here that are not directly part of Dashboard's UI plugin set or need specific core config.
     uppyInstance
-      .use(DragDrop, { target: '.uppy-Dashboard-AddFiles' })
-      .use(FileInput, { target: '.uppy-Dashboard-AddFiles', pretty: false })
       .use(ProgressBar, { target: 'body', hideAfterFinish: true })
       .use(Url, { companionUrl: 'https://companion.uppy.io' }) // Uppy's demo companion
-      .use(Webcam, { 
-        onBeforeSnapshot: () => Promise.resolve(),
-        countdown: false,
-        modes: ['picture'],
-        mirror: true,
-        facingMode: 'user',
-        showRecordingLength: false,
-        target: '.uppy-Dashboard-AddFiles',
-       })
       // For GoogleDrive, Dropbox, Instagram, a Companion server is typically needed.
       // Using Uppy's public companion for demo purposes.
       // Replace with your own companion instance in production.
       .use(GoogleDrive, { companionUrl: 'https://companion.uppy.io' })
       .use(Dropbox, { companionUrl: 'https://companion.uppy.io' })
       .use(Instagram, { companionUrl: 'https://companion.uppy.io' });
+      // Webcam plugin is listed in Dashboard plugins prop, so it will be initialized by Dashboard.
+      // If specific core-level Webcam options were needed beyond what Dashboard offers, you might .use(Webcam) here
+      // but without a 'target' if Dashboard is also listing it.
+      // For this case, relying on Dashboard's plugin management is cleaner.
 
     return uppyInstance;
   }, []);
