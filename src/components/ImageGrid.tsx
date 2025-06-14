@@ -4,7 +4,7 @@
 import React from 'react';
 import { Responsive, WidthProvider, Layout, Layouts } from 'react-grid-layout';
 import NextImage from 'next/image';
-import { X, Share, Eye, GripVertical } from 'lucide-react';
+import { X, Share, Eye, Move } from 'lucide-react'; // Changed GripVertical to Move
 import type { UploadedImage, CustomLayoutItem } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -67,9 +67,9 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
           <div key={item.i} data-grid={item} className="group relative overflow-hidden rounded-lg shadow-md bg-card">
             <Card className="w-full h-full flex flex-col overflow-hidden border-0 shadow-none">
               <div
-                className="draggable-handle absolute top-2 left-1/2 transform -translate-x-1/2 z-20 p-1.5 backdrop-blur-sm border border-white/20 cursor-grab bg-black/30 hover:bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                className="draggable-handle absolute top-2 left-1/2 transform -translate-x-1/2 z-20 p-1.5 backdrop-blur-lg border border-white/20 cursor-grab bg-black/30 hover:bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               >
-                <GripVertical className="size-4 text-white/80" />
+                <Move className="size-4 text-white/80" /> 
               </div>
               <CardContent className="p-0 flex-grow relative">
                 <NextImage {...imageProps} />
