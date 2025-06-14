@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 
 const DEFAULT_ITEM_WIDTH = 4; 
 const DEFAULT_ROW_HEIGHT = 30; 
-const COLS = { lg: 32, md: 10, sm: 6, xs: 4, xxs: 2 }; 
+const COLS = { lg: 32, md: 24, sm: 16, xs: 12, xxs: 10 };
 
 const generateLayoutItem = (
   image: UploadedImage,
@@ -179,32 +179,27 @@ export default function IGalleryPage() {
   }, [calculateInitialLayoutItem]);
 
   const onLayoutChange = useCallback((currentLayout: Layout[], allLayouts: Layouts) => {
-    // Directly update the state with all layouts provided by ResponsiveGridLayout.
-    // This includes layouts for all breakpoints.
     setLayouts(allLayouts);
-  }, [setLayouts]); // Only depends on setLayouts, which is stable
+  }, [setLayouts]); 
 
   const handleImageRemove = useCallback((imageId: string) => {
     setImages(prevImages => prevImages.filter(img => img.id !== imageId));
     setLayouts(prevLayouts => {
       const newLayoutsState: Layouts = {};
-      // Iterate over all breakpoint keys in the layouts object
       (Object.keys(prevLayouts) as Array<keyof Layouts>).forEach(breakpointKey => {
         newLayoutsState[breakpointKey] = (prevLayouts[breakpointKey] || []).filter(
           (layoutItem: Layout) => layoutItem.i !== imageId
         );
       });
-      // If all images are removed, ensure layouts are cleared for all breakpoints
       if (images.filter(img => img.id !== imageId).length === 0) {
         return { lg: [], md: [], sm: [], xs: [], xxs: [] };
       }
       return newLayoutsState;
     });
-  }, [images]); // images dependency is needed here for the filter check
+  }, [images]); 
 
   const handleRemoveAllImages = () => {
     setImages([]);
-    // Clear layouts for all known breakpoints
     setLayouts({ lg: [], md: [], sm: [], xs: [], xxs: [] });
   };
 
@@ -254,31 +249,27 @@ export default function IGalleryPage() {
   }, [currentPreviewIndex, handleNextPreview, handlePrevPreview, handleClosePreview]);
 
 
-  // Helper to get thumbnails for the preview modal, showing current, prev, and next.
   const getThumbnailsForPreview = (): UploadedImage[] => {
     if (!images.length || currentPreviewIndex === null) return [];
-    const totalThumbnails = 5; // Number of thumbnails to show (e.g., current + 2 prev + 2 next)
+    const totalThumbnails = 5; 
     const halfPoint = Math.floor(totalThumbnails / 2);
 
     if (images.length <= totalThumbnails) {
-      // If fewer images than totalThumbnails, just show all of them
       return images;
     }
 
-    // Calculate start and end indices for the slice, ensuring we loop around
     let startIndex = currentPreviewIndex - halfPoint;
-    let endIndex = currentPreviewIndex + halfPoint + (images.length % 2 === 0 ? 0 : 1); // +1 if odd to keep symmetry
+    let endIndex = currentPreviewIndex + halfPoint + (images.length % 2 === 0 ? 0 : 1); 
 
     if (startIndex < 0) {
-      endIndex -= startIndex; // Shift end index by the amount start was below 0
+      endIndex -= startIndex; 
       startIndex = 0;
     }
     if (endIndex > images.length) {
-      startIndex -= (endIndex - images.length); // Shift start index by the amount end was over length
+      startIndex -= (endIndex - images.length); 
       endIndex = images.length;
     }
     
-    // Ensure startIndex is not negative after adjustment (can happen if totalThumbnails > images.length)
     startIndex = Math.max(0, startIndex);
 
     return images.slice(startIndex, endIndex);
@@ -287,7 +278,6 @@ export default function IGalleryPage() {
   const previewImage = currentPreviewIndex !== null ? images[currentPreviewIndex] : null;
 
   if (!mounted) {
-    // Basic loading state to prevent hydration mismatches or unstyled content flash
     return <div className="min-h-screen bg-background flex items-center justify-center"><p>Loading iGallery...</p></div>;
   }
 
@@ -331,22 +321,20 @@ export default function IGalleryPage() {
               layouts={layouts} 
               onLayoutChange={onLayoutChange} 
               onImageRemove={handleImageRemove}
-              onImagePreview={handleOpenPreview} // Pass the preview handler
+              onImagePreview={handleOpenPreview}
             />
           )}
         </section>
       </main>
 
-      {/* Image Preview Modal */}
       {previewImage && (
         <Dialog open={currentPreviewIndex !== null} onOpenChange={(isOpen) => !isOpen && handleClosePreview()}>
+           <DialogTitle className="sr-only">{previewImage.name}</DialogTitle>
           <DialogContent className={cn(
             "p-0 m-0 w-screen h-screen max-w-none border-none rounded-none flex items-center justify-center outline-none ring-0 focus:ring-0",
-            "frosted-glass" // Added frosted-glass effect
+            "frosted-glass" 
             )}>
-            <DialogTitle className="sr-only">{previewImage.name}</DialogTitle>
             <div className="relative flex flex-col items-center justify-center w-full h-full p-4">
-              {/* Close Button */}
               <DialogClose asChild>
                 <Button 
                   variant="ghost" 
@@ -358,9 +346,7 @@ export default function IGalleryPage() {
                 </Button>
               </DialogClose>
 
-              {/* Main Image & Navigation Arrows */}
               <div className="relative flex items-center justify-center w-full flex-grow mb-4">
-                {/* Previous Button */}
                 {images.length > 1 && (
                   <Button
                     variant="ghost"
@@ -373,19 +359,17 @@ export default function IGalleryPage() {
                   </Button>
                 )}
 
-                {/* Image Container */}
                 <div className="relative w-full max-w-3xl lg:max-w-4xl xl:max-w-5xl h-full max-h-[70vh] sm:max-h-[75vh] flex items-center justify-center">
                   <Image
                     src={previewImage.src}
                     alt={previewImage.name}
                     fill
-                    className="object-contain rounded-lg shadow-2xl" // Shadow for depth
+                    className="object-contain rounded-lg shadow-2xl"
                     data-ai-hint={previewImage.aiHint}
-                    unoptimized // Assuming original Pexels images are optimized
+                    unoptimized 
                   />
                 </div>
 
-                {/* Next Button */}
                 {images.length > 1 && (
                   <Button
                     variant="ghost"
@@ -399,8 +383,7 @@ export default function IGalleryPage() {
                 )}
               </div>
 
-              {/* Thumbnail Strip */}
-              {images.length > 1 && ( // Only show thumbnails if more than one image
+              {images.length > 1 && ( 
                 <div className="flex-shrink-0 w-full max-w-md sm:max-w-lg md:max-w-xl flex justify-center items-end gap-2 sm:gap-3 p-2 h-[100px] sm:h-[120px]">
                   {getThumbnailsForPreview().map((thumbImage) => (
                     <button
@@ -408,10 +391,10 @@ export default function IGalleryPage() {
                       onClick={() => setCurrentPreviewIndex(images.findIndex(img => img.id === thumbImage.id))}
                       className={cn(
                         "relative rounded-md overflow-hidden transition-all duration-200 ease-in-out aspect-square",
-                        "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black/50", // Focus style
+                        "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black/50", 
                         thumbImage.id === previewImage.id
-                          ? "w-20 h-20 sm:w-24 sm:h-24 ring-2 ring-primary shadow-xl border-2 border-primary" // Active thumbnail
-                          : "w-14 h-14 sm:w-16 sm:h-16 opacity-70 hover:opacity-100 hover:scale-105 border-2 border-transparent hover:border-gray-400" // Inactive thumbnail
+                          ? "w-20 h-20 sm:w-24 sm:h-24 ring-2 ring-primary shadow-xl border-2 border-primary" 
+                          : "w-14 h-14 sm:w-16 sm:h-16 opacity-70 hover:opacity-100 hover:scale-105 border-2 border-transparent hover:border-gray-400" 
                       )}
                       aria-label={`View image ${thumbImage.name}`}
                     >
@@ -419,10 +402,10 @@ export default function IGalleryPage() {
                         src={thumbImage.src}
                         alt={thumbImage.name}
                         fill
-                        className="object-cover" // Ensure thumbnails fill their space
-                        unoptimized // Assuming original Pexels images are optimized
+                        className="object-cover" 
+                        unoptimized 
                       />
-                       {thumbImage.id === previewImage.id && ( // Subtle overlay for active thumbnail
+                       {thumbImage.id === previewImage.id && ( 
                          <div className="absolute inset-0 bg-primary/30" />
                        )}
                     </button>

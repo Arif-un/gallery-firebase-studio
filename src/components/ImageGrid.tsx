@@ -32,7 +32,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
       className="layout"
       layouts={layouts}
       breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-      cols={{ lg: 32, md: 10, sm: 6, xs: 4, xxs: 2 }} // Updated lg cols to 32
+      cols={{ lg: 32, md: 24, sm: 16, xs: 12, xxs: 10 }}
       rowHeight={30}
       margin={[10, 10]}
       containerPadding={[10, 10]}
@@ -48,7 +48,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
           fill: true,
           sizes: "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
           className: "rounded-lg transition-all duration-300 group-hover:blur-sm object-cover",
-          unoptimized: true, // Assuming Pexels images are already optimized
+          unoptimized: true, 
         };
 
         if (image.aiHint) {
@@ -58,7 +58,6 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
         return (
           <div key={image.id} className="group relative overflow-hidden rounded-lg shadow-md bg-card">
             <Card className="w-full h-full flex flex-col overflow-hidden border-0 shadow-none">
-              {/* Drag Handle - Centered at the top, appears on hover */}
               <div
                 className="draggable-handle absolute top-2 left-1/2 transform -translate-x-1/2 z-20 p-1.5 backdrop-blur-lg border-2 border-white/20 cursor-grab bg-black/30 hover:bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               >
@@ -68,13 +67,12 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
                 <NextImage {...imageProps} />
               </CardContent>
             </Card>
-            {/* Remove Button - Top right, frosted glass, appears on hover */}
             <Button
               variant="ghost"
               size="icon"
               className="absolute top-2 right-2 z-10 text-white/80 opacity-0 group-hover:opacity-100 transition-opacity rounded-full p-2 h-8 w-8 flex items-center justify-center bg-black/20 hover:bg-destructive/80 hover:text-destructive-foreground backdrop-blur-lg border-2 border-white/20"
               onClick={(e) => {
-                e.stopPropagation(); // Prevent grid item click or drag
+                e.stopPropagation(); 
                 onImageRemove(image.id);
               }}
               aria-label={`Remove ${image.name}`}
@@ -82,7 +80,6 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
               <X className="h-4 w-4" />
             </Button>
 
-            {/* Preview Button - Centered, frosted glass, appears on hover */}
             <Button
               variant="ghost"
               size="icon"
@@ -93,19 +90,16 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
               <Eye className="h-6 w-6" />
             </Button>
 
-            {/* Bottom Bar: Image Name (Caption) and Share Button - Aligned left */}
             <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 z-10">
-              {/* Image Name / Caption Container */}
-              <div className="p-2 bg-black/20 backdrop-blur-lg border border-white/20 rounded-md">
+              <div className="p-2 bg-black/20 backdrop-blur-lg border-2 border-white/20 rounded-md">
                 <span className="text-white text-xs sm:text-sm font-semibold truncate">{image.name}</span>
               </div>
-              {/* Share Button */}
               <Button
                 variant="ghost"
                 size="icon"
                 className="text-white/90 rounded-full p-1.5 h-7 w-7 flex items-center justify-center bg-black/20 hover:bg-black/30 backdrop-blur-lg border-2 border-white/20"
                 aria-label={`Share ${image.name}`}
-                onClick={(e) => e.stopPropagation()} // Prevent grid item click
+                onClick={(e) => e.stopPropagation()} 
               >
                 <Share className='h-4 w-4' />
               </Button>
