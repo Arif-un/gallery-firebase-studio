@@ -65,6 +65,11 @@ const defaultImagesSeed: Omit<UploadedImage, 'id' | 'type'>[] = [
   { src: 'https://images.pexels.com/photos/2884867/pexels-photo-2884867.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2', name: 'Forest Path Sunlight', width: 1260, height: 750, aiHint: 'forest path' },
   { src: 'https://images.pexels.com/photos/1535162/pexels-photo-1535162.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2', name: 'Mountain Starry Sky', width: 1260, height: 750, aiHint: 'mountain sky' },
   { src: 'https://images.pexels.com/photos/1226302/pexels-photo-1226302.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2', name: 'Desert Dunes Sunset', width: 1260, height: 750, aiHint: 'desert dunes' },
+  { src: 'https://images.pexels.com/photos/440731/pexels-photo-440731.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2', name: 'Autumn Road', width: 1260, height: 750, aiHint: 'autumn road' },
+  { src: 'https://images.pexels.com/photos/2144922/pexels-photo-2144922.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2', name: 'City Night Lights', width: 1260, height: 750, aiHint: 'city lights' },
+  { src: 'https://images.pexels.com/photos/4697568/pexels-photo-4697568.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2', name: 'Vintage Car Street', width: 1260, height: 750, aiHint: 'vintage car' },
+  { src: 'https://images.pexels.com/photos/1563356/pexels-photo-1563356.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2', name: 'Forest Trail Autumn', width: 1260, height: 750, aiHint: 'forest trail' },
+  { src: 'https://images.pexels.com/photos/3319815/pexels-photo-3319815.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2', name: 'Lighthouse Coast', width: 1260, height: 750, aiHint: 'lighthouse coast' },
 ];
 
 const initialImages: UploadedImage[] = defaultImagesSeed.map((img, index) => ({
@@ -342,8 +347,10 @@ export default function IGalleryPage() {
                     <ChevronLeft className="h-8 w-8 sm:h-10 sm:w-10" />
                   </Button>
                 )}
-
+                
+                {/* Outer Sizing Wrapper */}
                 <div className="relative w-3/4 max-h-[calc(100vh_-_12rem)]">
+                  {/* Inner Styled Wrapper */}
                   <div className={cn(
                     "relative w-full h-auto p-2 rounded-xl overflow-hidden",
                     "bg-black/20 dark:bg-white/10 backdrop-blur-md", 
