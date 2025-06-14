@@ -7,7 +7,7 @@ import type { Layout, Layouts } from 'react-grid-layout';
 import ImageUploader from '@/components/ImageUploader';
 import ImageGrid from '@/components/ImageGrid';
 import { Button } from '@/components/ui/button';
-import { Sun, Moon, Trash2, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
+import { Sun, Moon, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import Image from 'next/image';
 
@@ -138,16 +138,12 @@ export default function IGalleryPage() {
 
     setLayouts(prevLayouts => {
       const newLayoutsState: Layouts = {};
-      for (const bk in prevLayouts) {
-        if (Object.prototype.hasOwnProperty.call(prevLayouts, bk)) {
-          newLayoutsState[bk as keyof Layouts] = prevLayouts[bk as keyof Layouts] ? [...prevLayouts[bk as keyof Layouts]!] : [];
-        }
-      }
+      // Ensure all breakpoints are initialized as new arrays
+      (Object.keys(COLS) as Array<keyof typeof COLS>).forEach(bk => {
+        newLayoutsState[bk] = prevLayouts[bk] ? [...prevLayouts[bk]!] : [];
+      });
       
-      if (!newLayoutsState.lg) {
-        newLayoutsState.lg = [];
-      }
-      const currentLgLayoutForNewItemsCalculation = [...(newLayoutsState.lg || [])]; 
+      let currentLgLayoutForNewItemsCalculation = newLayoutsState.lg ? [...newLayoutsState.lg] : [];
 
       const itemsLayoutToAdd: Layout[] = [];
       newImages.forEach(img => {
@@ -168,7 +164,7 @@ export default function IGalleryPage() {
     if (images.length > 0 && hasRelevantLayouts) {
          setLayouts(allLayouts);
     } else if (images.length === 0) {
-        setLayouts({ lg: [] });
+        setLayouts({ lg: [], md: [], sm: [], xs: [], xxs: [] });
     }
   }, [images.length]);
 
@@ -176,21 +172,18 @@ export default function IGalleryPage() {
     setImages(prevImages => prevImages.filter(img => img.id !== imageId));
     setLayouts(prevLayouts => {
       const newLayoutsState: Layouts = {};
-      for (const breakpointKey in prevLayouts) {
-        if (Object.prototype.hasOwnProperty.call(prevLayouts, breakpointKey)) {
-          const castedBreakpointKey = breakpointKey as keyof Layouts;
-          newLayoutsState[castedBreakpointKey] = (prevLayouts[castedBreakpointKey] || []).filter(
-            (layoutItem: Layout) => layoutItem.i !== imageId
-          );
-        }
-      }
-      if (newLayoutsState.lg && newLayoutsState.lg.length === 0) {
-        // Reset all breakpoints if lg becomes empty
-        return { lg: [], md: [], sm: [], xs: [], xxs: [] }; 
+      (Object.keys(prevLayouts) as Array<keyof Layouts>).forEach(breakpointKey => {
+        newLayoutsState[breakpointKey] = (prevLayouts[breakpointKey] || []).filter(
+          (layoutItem: Layout) => layoutItem.i !== imageId
+        );
+      });
+      // If lg becomes empty, reset all to ensure consistency, especially if other breakpoints might not have been explicitly cleared.
+      if (newLayoutsState.lg && newLayoutsState.lg.length === 0 && images.filter(img => img.id !== imageId).length === 0) {
+        return { lg: [], md: [], sm: [], xs: [], xxs: [] };
       }
       return newLayoutsState;
     });
-  }, []);
+  }, [images]);
 
   const handleRemoveAllImages = () => {
     setImages([]);
@@ -212,13 +205,13 @@ export default function IGalleryPage() {
       if (currentPreviewIndex !== null && images.length > 0) {
           setCurrentPreviewIndex((currentPreviewIndex + 1) % images.length);
       }
-  }, [currentPreviewIndex, images.length]);
+  }, [currentPreviewIndex, images]);
 
   const handlePrevPreview = useCallback(() => {
       if (currentPreviewIndex !== null && images.length > 0) {
           setCurrentPreviewIndex((currentPreviewIndex - 1 + images.length) % images.length);
       }
-  }, [currentPreviewIndex, images.length]);
+  }, [currentPreviewIndex, images]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -243,8 +236,8 @@ export default function IGalleryPage() {
   }, [currentPreviewIndex, handleNextPreview, handlePrevPreview, handleClosePreview]);
 
   const previewImage = currentPreviewIndex !== null ? images[currentPreviewIndex] : null;
-  const nextImage = currentPreviewIndex !== null && images.length > 1 ? images[(currentPreviewIndex + 1) % images.length] : null;
-  const prevImage = currentPreviewIndex !== null && images.length > 1 ? images[(currentPreviewIndex - 1 + images.length) % images.length] : null;
+  const nextImage = currentPreviewIndex !== null && images.length > 0 ? images[(currentPreviewIndex + 1) % images.length] : null;
+  const prevImage = currentPreviewIndex !== null && images.length > 0 ? images[(currentPreviewIndex - 1 + images.length) % images.length] : null;
 
 
   if (!mounted) {
@@ -299,8 +292,12 @@ export default function IGalleryPage() {
 
       {previewImage && (
         <Dialog open={currentPreviewIndex !== null} onOpenChange={(isOpen) => !isOpen && handleClosePreview()}>
-          <DialogContent className="w-full max-w-xl md:max-w-2xl lg:max-w-4xl p-0 bg-card/90 backdrop-blur-lg border-border rounded-xl overflow-hidden">
-            <div className="relative w-full aspect-video max-h-[75vh]">
+          <DialogContent className="w-full max-w-xl md:max-w-2xl lg:max-w-4xl xl:max-w-5xl p-0 bg-card/90 backdrop-blur-lg border-border rounded-xl overflow-hidden shadow-2xl">
+            <DialogHeader className="p-4 border-b border-border">
+              <DialogTitle className="text-lg font-medium text-foreground truncate">{previewImage.name}</DialogTitle>
+            </DialogHeader>
+            
+            <div className="relative w-full aspect-video max-h-[calc(100vh-220px)] sm:max-h-[calc(100vh-250px)] flex items-center justify-center p-1 bg-black/5">
               <Image
                 src={previewImage.src}
                 alt={previewImage.name}
@@ -310,31 +307,43 @@ export default function IGalleryPage() {
                 unoptimized
               />
             </div>
-            <DialogHeader className="p-4 border-b border-border">
-              <DialogTitle className="text-lg text-foreground">{previewImage.name}</DialogTitle>
-            </DialogHeader>
-            <DialogFooter className="p-2 sm:p-4 grid grid-cols-3 gap-2 items-center bg-background/80 rounded-b-xl">
-              <div className="flex justify-start">
-                {prevImage && prevImage.id !== previewImage.id && images.length > 1 && (
-                  <Button variant="ghost" size="icon" onClick={handlePrevPreview} className="h-12 w-12 sm:h-16 sm:w-16 relative rounded-md overflow-hidden border-2 border-transparent hover:border-primary transition-all">
-                    <Image src={prevImage.src} alt={`Previous: ${prevImage.name}`} fill className="object-cover" unoptimized/>
-                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
+
+            <DialogFooter className="p-3 sm:p-4 flex justify-between items-center bg-background/70 backdrop-blur-sm rounded-b-xl border-t border-border">
+              <div className="w-1/3 flex justify-start">
+                {images.length > 1 && prevImage && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handlePrevPreview}
+                    aria-label={`Previous image: ${prevImage.name}`}
+                    className="p-0 h-10 w-10 sm:h-12 sm:w-12 relative rounded-md overflow-hidden group border-2 border-transparent hover:border-primary focus-visible:border-primary transition-all"
+                  >
+                    <Image src={prevImage.src} alt={prevImage.name} layout="fill" objectFit="cover" className="group-hover:opacity-80 transition-opacity" unoptimized />
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
                   </Button>
                 )}
               </div>
-              <div className="flex justify-center items-center gap-2">
-                <Button variant="outline" onClick={handlePrevPreview} disabled={images.length <= 1} aria-label="Previous image">
-                  <ChevronLeft className="h-5 w-5" />
+
+              <div className="flex items-center gap-2">
+                <Button variant="outline" onClick={handlePrevPreview} disabled={images.length <= 1} aria-label="Previous image" className="rounded-full h-10 w-10 sm:h-12 sm:w-12">
+                  <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
                 </Button>
-                <Button variant="outline" onClick={handleNextPreview} disabled={images.length <= 1} aria-label="Next image">
-                  <ChevronRight className="h-5 w-5" />
+                <Button variant="outline" onClick={handleNextPreview} disabled={images.length <= 1} aria-label="Next image" className="rounded-full h-10 w-10 sm:h-12 sm:w-12">
+                  <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
                 </Button>
               </div>
-              <div className="flex justify-end">
-                {nextImage && nextImage.id !== previewImage.id && images.length > 1 && (
-                  <Button variant="ghost" size="icon" onClick={handleNextPreview} className="h-12 w-12 sm:h-16 sm:w-16 relative rounded-md overflow-hidden border-2 border-transparent hover:border-primary transition-all">
-                    <Image src={nextImage.src} alt={`Next: ${nextImage.name}`} fill className="object-cover" unoptimized/>
-                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
+
+              <div className="w-1/3 flex justify-end">
+                {images.length > 1 && nextImage && (
+                   <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleNextPreview}
+                    aria-label={`Next image: ${nextImage.name}`}
+                    className="p-0 h-10 w-10 sm:h-12 sm:w-12 relative rounded-md overflow-hidden group border-2 border-transparent hover:border-primary focus-visible:border-primary transition-all"
+                  >
+                    <Image src={nextImage.src} alt={nextImage.name} layout="fill" objectFit="cover" className="group-hover:opacity-80 transition-opacity" unoptimized />
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
                   </Button>
                 )}
               </div>
