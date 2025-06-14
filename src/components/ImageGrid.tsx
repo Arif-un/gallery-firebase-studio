@@ -4,7 +4,7 @@
 import React from 'react';
 import { Responsive, WidthProvider, Layout, Layouts } from 'react-grid-layout';
 import NextImage from 'next/image';
-import { X, Share, Eye, Move } from 'lucide-react'; // Changed GripVertical to Move
+import { X, Share, Eye, Move } from 'lucide-react';
 import type { UploadedImage, CustomLayoutItem } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -69,7 +69,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
               <div
                 className="draggable-handle absolute top-2 left-1/2 transform -translate-x-1/2 z-20 p-1.5 backdrop-blur-lg border border-white/20 cursor-grab bg-black/30 hover:bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               >
-                <Move className="size-4 text-white/80" /> 
+                <Move className="size-4 text-white/80" />
               </div>
               <CardContent className="p-0 flex-grow relative">
                 <NextImage {...imageProps} />
@@ -98,7 +98,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
               <Eye className="h-6 w-6" />
             </Button>
 
-            <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex justify-between items-center z-10">
+            <div className="absolute bottom-0 left-0 right-0 p-2 bg-black/20 backdrop-blur-lg border border-white/20 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex justify-between items-center z-10 m-2">
               <span className="text-white text-xs sm:text-sm font-semibold truncate pr-1">{image.name}</span>
               <div className="flex gap-1 sm:gap-2">
                 <Button
