@@ -340,9 +340,9 @@ export default function IGalleryPage() {
                   </Button>
                 )}
 
-                <div
+                <div /* This is the Frame for the image */
                   className={cn(
-                    "relative inline-block max-w-full max-h-[calc(100vh_-_12rem)]", // Adjust 12rem based on actual header/footer/thumbnail height
+                    "relative max-w-full max-h-[calc(100vh_-_12rem)]", // Constrains the frame
                     "bg-black/5 dark:bg-white/5 backdrop-blur-sm rounded-xl shadow-2xl p-3",
                     "border border-white/10 dark:border-black/10"
                   )}
@@ -351,10 +351,9 @@ export default function IGalleryPage() {
                     key={previewImage.id}
                     src={previewImage.src}
                     alt={previewImage.name}
-                    width={previewImage.width}
-                    height={previewImage.height}
-                    className="block object-contain rounded-lg max-w-full max-h-full"
-                    sizes="(max-width: 640px) 90vw, (max-width: 1024px) 70vw, 1000px"
+                    fill // Image fills the parent frame (respecting padding)
+                    className="object-contain rounded-lg" // Maintains aspect ratio within its allocated space
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 60vw" // Adjusted sizes
                     data-ai-hint={previewImage.aiHint}
                     unoptimized 
                     priority={currentPreviewIndex === images.findIndex(img => img.id === previewImage.id)}
