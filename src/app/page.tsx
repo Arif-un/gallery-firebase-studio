@@ -7,41 +7,39 @@ import type { Layout, Layouts } from 'react-grid-layout';
 import ImageUploader from '@/components/ImageUploader';
 import ImageGrid from '@/components/ImageGrid';
 import { Button } from '@/components/ui/button';
-import { Sun, Moon, Trash2 } from 'lucide-react';
+import { Sun, Moon, Trash2, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import Image from 'next/image';
 
-const DEFAULT_ITEM_WIDTH = 4; // In grid units
-const DEFAULT_ROW_HEIGHT = 30; // In pixels, ensure this matches ImageGrid's rowHeight
-const COLS = { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }; // Match ImageGrid's cols
+const DEFAULT_ITEM_WIDTH = 4; 
+const DEFAULT_ROW_HEIGHT = 30; 
+const COLS = { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }; 
 
-// Helper function to generate layout items, can be used for initial state and dynamic additions
 const generateLayoutItem = (
   image: UploadedImage,
   existingLayout: Layout[] = []
 ): Layout => {
   const aspectRatio = image.width / image.height;
-  // Estimate width based on a typical large screen scenario for column calculation
-  const approximateColWidthLg = 1200 / COLS.lg; // Assuming 1200px container for 'lg'
+  const approximateColWidthLg = 1200 / COLS.lg; 
   const estimatedPixelWidth = DEFAULT_ITEM_WIDTH * approximateColWidthLg;
   const estimatedPixelHeight = estimatedPixelWidth / aspectRatio;
-  const h = Math.max(2, Math.ceil(estimatedPixelHeight / (DEFAULT_ROW_HEIGHT + 10 /* marginY, from RGL config */)));
+  const h = Math.max(2, Math.ceil(estimatedPixelHeight / (DEFAULT_ROW_HEIGHT + 10 )));
 
   let yPos = 0;
   if (existingLayout.length > 0) {
-    // Find the maximum y + h to place the new item below others
     yPos = Math.max(...existingLayout.map(item => item.y + item.h), 0);
   }
-  // Calculate x position to wrap items in rows
+  
   const itemsInCurrentPotentialRow = existingLayout.filter(item => item.y === yPos);
   let xPos = 0;
   if(itemsInCurrentPotentialRow.length > 0){
     xPos = itemsInCurrentPotentialRow.reduce((sum, item) => sum + item.w, 0) % COLS.lg;
   }
-   // If xPos + new item width exceeds COLS.lg, move to next row
+ 
   if (xPos + DEFAULT_ITEM_WIDTH > COLS.lg) {
-    yPos = yPos + h; // Or some minimum height if h is too large for a new row start
+    yPos = yPos + h; 
     xPos = 0;
   }
-
 
   return {
     i: image.id,
@@ -55,26 +53,23 @@ const generateLayoutItem = (
 };
 
 const defaultImagesSeed: Omit<UploadedImage, 'id' | 'type'>[] = [
-  { src: 'https://placehold.co/800x500.png', name: 'Mountain Vista', width: 800, height: 500, aiHint: 'mountain vista' },
-  { src: 'https://placehold.co/400x600.png', name: 'Forest Trail', width: 400, height: 600, aiHint: 'forest trail' },
-  { src: 'https://placehold.co/700x450.png', name: 'Sunset Beach', width: 700, height: 450, aiHint: 'sunset beach' },
-  { src: 'https://placehold.co/600x700.png', name: 'Desert Mirage', width: 600, height: 700, aiHint: 'desert mirage' },
+  { src: 'https://placehold.co/800x500.png', name: 'Mountain Vista', width: 800, height: 500, aiHint: 'mountain lake' },
+  { src: 'https://placehold.co/400x600.png', name: 'Forest Trail', width: 400, height: 600, aiHint: 'deep forest' },
+  { src: 'https://placehold.co/700x450.png', name: 'Sunset Beach', width: 700, height: 450, aiHint: 'tropical sunset' },
+  { src: 'https://placehold.co/600x700.png', name: 'Desert Mirage', width: 600, height: 700, aiHint: 'sand dunes' },
 ];
 
 const initialImages: UploadedImage[] = defaultImagesSeed.map((img, index) => ({
   ...img,
   id: `default-image-${index + 1}`,
-  type: 'image/png',
+  type: 'image/png', 
 }));
 
-const initialLayoutsLg: Layout[] = [];
 let tempCurrentLayoutForInit: Layout[] = [];
-initialImages.forEach(img => {
+const initialLayoutsLg: Layout[] = initialImages.map(img => {
   const layoutItem = generateLayoutItem(img, tempCurrentLayoutForInit);
-  initialLayoutsLg.push(layoutItem);
-  // Add to temp layout for correct yPos calculation for subsequent items
-  // This ensures items are stacked correctly initially
   tempCurrentLayoutForInit.push(layoutItem);
+  return layoutItem;
 });
 
 
@@ -83,7 +78,8 @@ export default function IGalleryPage() {
   const [layouts, setLayouts] = useState<Layouts>({ lg: initialLayoutsLg });
   const [mounted, setMounted] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
-   const defaultsInitializedRef = useRef(false);
+  const defaultsInitializedRef = useRef(false);
+  const [currentPreviewIndex, setCurrentPreviewIndex] = useState<number | null>(null);
 
 
   useEffect(() => {
@@ -97,36 +93,30 @@ export default function IGalleryPage() {
       document.documentElement.classList.add('dark');
     }
 
-    // Check if defaults need to be initialized (e.g. if localStorage was empty or cleared)
-    // This is a simplified check; a more robust solution might involve checking if `initialImages` were truly the source
     if (images.length === 0 && (!layouts.lg || layouts.lg.length === 0) && !defaultsInitializedRef.current) {
         const derivedInitialImages: UploadedImage[] = defaultImagesSeed.map((img, index) => ({
             ...img,
-            id: `default-image-${index + 1}`, // ensure unique IDs if this runs multiple times
+            id: `default-image-reinit-${index + 1}`, 
             type: 'image/png',
         }));
         
-        const derivedInitialLayoutsLg: Layout[] = [];
         let tempLayout: Layout[] = [];
-        derivedInitialImages.forEach(img => {
-            const layoutItem = calculateInitialLayoutItem(img, tempLayout); // Use the hook here
-            derivedInitialLayoutsLg.push(layoutItem);
+        const derivedInitialLayoutsLg: Layout[] = derivedInitialImages.map(img => {
+            const layoutItem = generateLayoutItem(img, tempLayout);
             tempLayout.push(layoutItem);
+            return layoutItem;
         });
         setImages(derivedInitialImages);
         setLayouts({ lg: derivedInitialLayoutsLg });
         defaultsInitializedRef.current = true;
     }
-
-  }, []); // Empty dependency array for one-time mount effects
+  }, []);
 
 
   const calculateInitialLayoutItem = useCallback((
     image: UploadedImage,
     existingLayout: Layout[] = []
   ): Layout => {
-    // This is the hook version, can be kept if dynamic additions need it,
-    // but initial state uses generateLayoutItem. For consistency, it uses the same logic.
     return generateLayoutItem(image, existingLayout);
   }, []);
 
@@ -148,7 +138,6 @@ export default function IGalleryPage() {
 
     setLayouts(prevLayouts => {
       const newLayoutsState: Layouts = {};
-      // Deep copy all existing breakpoint layouts
       for (const bk in prevLayouts) {
         if (Object.prototype.hasOwnProperty.call(prevLayouts, bk)) {
           newLayoutsState[bk as keyof Layouts] = prevLayouts[bk as keyof Layouts] ? [...prevLayouts[bk as keyof Layouts]!] : [];
@@ -158,31 +147,27 @@ export default function IGalleryPage() {
       if (!newLayoutsState.lg) {
         newLayoutsState.lg = [];
       }
-      // Use a mutable copy for calculating positions of new items within this batch
-      const currentLgLayoutForNewItemsCalculation = [...newLayoutsState.lg!]; 
+      const currentLgLayoutForNewItemsCalculation = [...(newLayoutsState.lg || [])]; 
 
       const itemsLayoutToAdd: Layout[] = [];
       newImages.forEach(img => {
         if (!currentLgLayoutForNewItemsCalculation.find(item => item.i === img.id)) {
             const newLayoutItem = calculateInitialLayoutItem(img, currentLgLayoutForNewItemsCalculation);
             itemsLayoutToAdd.push(newLayoutItem);
-            currentLgLayoutForNewItemsCalculation.push(newLayoutItem); // Add to temp layout for next item
+            currentLgLayoutForNewItemsCalculation.push(newLayoutItem); 
         }
       });
       
-      newLayoutsState.lg = [...newLayoutsState.lg!, ...itemsLayoutToAdd];
+      newLayoutsState.lg = [...(newLayoutsState.lg || []), ...itemsLayoutToAdd];
       return newLayoutsState;
     });
   }, [calculateInitialLayoutItem]);
 
   const onLayoutChange = useCallback((currentLayout: Layout[], allLayouts: Layouts) => {
-    // Only update if allLayouts actually contains data.
-    // This check prevents resetting layouts if `allLayouts` is empty during an intermediate state.
     const hasRelevantLayouts = Object.values(allLayouts).some(layoutArray => layoutArray.length > 0);
     if (images.length > 0 && hasRelevantLayouts) {
          setLayouts(allLayouts);
     } else if (images.length === 0) {
-        // If all images are removed, layouts should be empty
         setLayouts({ lg: [] });
     }
   }, [images.length]);
@@ -199,9 +184,9 @@ export default function IGalleryPage() {
           );
         }
       }
-      // If after removal, lg is empty, ensure other breakpoints are also cleared or consistent
       if (newLayoutsState.lg && newLayoutsState.lg.length === 0) {
-        return { lg: [] }; // Reset all if the primary layout (lg) becomes empty
+        // Reset all breakpoints if lg becomes empty
+        return { lg: [], md: [], sm: [], xs: [], xxs: [] }; 
       }
       return newLayoutsState;
     });
@@ -209,8 +194,58 @@ export default function IGalleryPage() {
 
   const handleRemoveAllImages = () => {
     setImages([]);
-    setLayouts({ lg: [] });
+    setLayouts({ lg: [], md: [], sm: [], xs: [], xxs: [] });
   };
+
+  const handleOpenPreview = useCallback((imageId: string) => {
+      const imageIndex = images.findIndex(img => img.id === imageId);
+      if (imageIndex !== -1) {
+          setCurrentPreviewIndex(imageIndex);
+      }
+  }, [images]);
+
+  const handleClosePreview = useCallback(() => {
+      setCurrentPreviewIndex(null);
+  }, []);
+
+  const handleNextPreview = useCallback(() => {
+      if (currentPreviewIndex !== null && images.length > 0) {
+          setCurrentPreviewIndex((currentPreviewIndex + 1) % images.length);
+      }
+  }, [currentPreviewIndex, images.length]);
+
+  const handlePrevPreview = useCallback(() => {
+      if (currentPreviewIndex !== null && images.length > 0) {
+          setCurrentPreviewIndex((currentPreviewIndex - 1 + images.length) % images.length);
+      }
+  }, [currentPreviewIndex, images.length]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+        if (currentPreviewIndex === null) return;
+
+        if (event.key === 'ArrowRight') {
+            handleNextPreview();
+        } else if (event.key === 'ArrowLeft') {
+            handlePrevPreview();
+        } else if (event.key === 'Escape') {
+            handleClosePreview();
+        }
+    };
+
+    if (currentPreviewIndex !== null) {
+        window.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [currentPreviewIndex, handleNextPreview, handlePrevPreview, handleClosePreview]);
+
+  const previewImage = currentPreviewIndex !== null ? images[currentPreviewIndex] : null;
+  const nextImage = currentPreviewIndex !== null && images.length > 1 ? images[(currentPreviewIndex + 1) % images.length] : null;
+  const prevImage = currentPreviewIndex !== null && images.length > 1 ? images[(currentPreviewIndex - 1 + images.length) % images.length] : null;
+
 
   if (!mounted) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><p>Loading iGallery...</p></div>;
@@ -255,11 +290,58 @@ export default function IGalleryPage() {
               images={images} 
               layouts={layouts} 
               onLayoutChange={onLayoutChange} 
-              onImageRemove={handleImageRemove} 
+              onImageRemove={handleImageRemove}
+              onImagePreview={handleOpenPreview} 
             />
           )}
         </section>
       </main>
+
+      {previewImage && (
+        <Dialog open={currentPreviewIndex !== null} onOpenChange={(isOpen) => !isOpen && handleClosePreview()}>
+          <DialogContent className="w-full max-w-xl md:max-w-2xl lg:max-w-4xl p-0 bg-card/90 backdrop-blur-lg border-border rounded-xl overflow-hidden">
+            <div className="relative w-full aspect-video max-h-[75vh]">
+              <Image
+                src={previewImage.src}
+                alt={previewImage.name}
+                fill
+                className="object-contain"
+                data-ai-hint={previewImage.aiHint}
+                unoptimized
+              />
+            </div>
+            <DialogHeader className="p-4 border-b border-border">
+              <DialogTitle className="text-lg text-foreground">{previewImage.name}</DialogTitle>
+            </DialogHeader>
+            <DialogFooter className="p-2 sm:p-4 grid grid-cols-3 gap-2 items-center bg-background/80 rounded-b-xl">
+              <div className="flex justify-start">
+                {prevImage && prevImage.id !== previewImage.id && images.length > 1 && (
+                  <Button variant="ghost" size="icon" onClick={handlePrevPreview} className="h-12 w-12 sm:h-16 sm:w-16 relative rounded-md overflow-hidden border-2 border-transparent hover:border-primary transition-all">
+                    <Image src={prevImage.src} alt={`Previous: ${prevImage.name}`} fill className="object-cover" unoptimized/>
+                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
+                  </Button>
+                )}
+              </div>
+              <div className="flex justify-center items-center gap-2">
+                <Button variant="outline" onClick={handlePrevPreview} disabled={images.length <= 1} aria-label="Previous image">
+                  <ChevronLeft className="h-5 w-5" />
+                </Button>
+                <Button variant="outline" onClick={handleNextPreview} disabled={images.length <= 1} aria-label="Next image">
+                  <ChevronRight className="h-5 w-5" />
+                </Button>
+              </div>
+              <div className="flex justify-end">
+                {nextImage && nextImage.id !== previewImage.id && images.length > 1 && (
+                  <Button variant="ghost" size="icon" onClick={handleNextPreview} className="h-12 w-12 sm:h-16 sm:w-16 relative rounded-md overflow-hidden border-2 border-transparent hover:border-primary transition-all">
+                    <Image src={nextImage.src} alt={`Next: ${nextImage.name}`} fill className="object-cover" unoptimized/>
+                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
+                  </Button>
+                )}
+              </div>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
 
       <footer className="w-full max-w-6xl mt-12 text-center text-sm text-muted-foreground animate-fade-in-up animation-delay-400">
         <p>&copy; {new Date().getFullYear()} iGallery. Inspired by Apple. Crafted with Next.js & Tailwind CSS.</p>
