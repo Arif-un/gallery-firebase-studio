@@ -140,7 +140,6 @@ export default function IGalleryPage() {
 
     setLayouts(prevLayouts => {
       const newLayoutsState: Layouts = {};
-      // Ensure all existing breakpoint arrays are copied as new arrays
       (Object.keys(COLS) as Array<keyof typeof COLS>).forEach(bk => {
         newLayoutsState[bk] = prevLayouts[bk] ? [...prevLayouts[bk]!] : [];
       });
@@ -156,7 +155,6 @@ export default function IGalleryPage() {
         }
       });
       
-      // Add new items only to the 'lg' layout; ResponsiveGridLayout handles others
       newLayoutsState.lg = [...(newLayoutsState.lg || []), ...itemsLayoutToAdd];
       
       return newLayoutsState;
@@ -176,13 +174,11 @@ export default function IGalleryPage() {
     setImages(prevImages => prevImages.filter(img => img.id !== imageId));
     setLayouts(prevLayouts => {
       const newLayoutsState: Layouts = {};
-      // Ensure all breakpoint arrays are processed
       (Object.keys(prevLayouts) as Array<keyof Layouts>).forEach(breakpointKey => {
         newLayoutsState[breakpointKey] = (prevLayouts[breakpointKey] || []).filter(
           (layoutItem: Layout) => layoutItem.i !== imageId
         );
       });
-      // Check if after removal the gallery is empty
       if (images.filter(img => img.id !== imageId).length === 0) {
         return { lg: [], md: [], sm: [], xs: [], xxs: [] };
       }
@@ -318,7 +314,10 @@ export default function IGalleryPage() {
 
       {previewImage && (
         <Dialog open={currentPreviewIndex !== null} onOpenChange={(isOpen) => !isOpen && handleClosePreview()}>
-          <DialogContent className="p-0 m-0 w-screen h-screen max-w-none bg-black/80 backdrop-blur-lg border-none rounded-none flex items-center justify-center outline-none ring-0 focus:ring-0">
+          <DialogContent className={cn(
+            "p-0 m-0 w-screen h-screen max-w-none border-none rounded-none flex items-center justify-center outline-none ring-0 focus:ring-0",
+            "frosted-glass"
+            )}>
             <DialogTitle className="sr-only">{previewImage.name}</DialogTitle>
             <div className="relative flex flex-col items-center justify-center w-full h-full p-4">
               <DialogClose asChild>
@@ -423,4 +422,3 @@ export default function IGalleryPage() {
     </div>
   );
 }
-
