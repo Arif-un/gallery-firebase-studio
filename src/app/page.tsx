@@ -140,6 +140,7 @@ export default function IGalleryPage() {
 
     setLayouts(prevLayouts => {
       const newLayoutsState: Layouts = {};
+      // Ensure all existing breakpoint arrays are copied as new arrays
       (Object.keys(COLS) as Array<keyof typeof COLS>).forEach(bk => {
         newLayoutsState[bk] = prevLayouts[bk] ? [...prevLayouts[bk]!] : [];
       });
@@ -321,7 +322,12 @@ export default function IGalleryPage() {
             <DialogTitle className="sr-only">{previewImage.name}</DialogTitle>
             <div className="relative flex flex-col items-center justify-center w-full h-full p-4">
               <DialogClose asChild>
-                <Button variant="ghost" size="icon" className="absolute top-4 right-4 z-50 text-white hover:bg-white/20 rounded-full">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="absolute top-4 right-4 z-50 text-white rounded-full p-2 bg-black/20 hover:bg-black/30 backdrop-blur-lg border-2 border-white/20"
+                  aria-label="Close preview"
+                >
                   <X className="h-6 w-6" />
                 </Button>
               </DialogClose>
@@ -332,7 +338,7 @@ export default function IGalleryPage() {
                     variant="ghost"
                     size="icon"
                     onClick={handlePrevPreview}
-                    className="absolute left-2 sm:left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white transition-all"
+                    className="absolute left-2 sm:left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full text-white transition-all bg-black/20 hover:bg-black/40 backdrop-blur-lg border-2 border-white/20"
                     aria-label="Previous image"
                   >
                     <ChevronLeft className="h-8 w-8 sm:h-10 sm:w-10" />
@@ -355,7 +361,7 @@ export default function IGalleryPage() {
                     variant="ghost"
                     size="icon"
                     onClick={handleNextPreview}
-                    className="absolute right-2 sm:right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white transition-all"
+                    className="absolute right-2 sm:right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full text-white transition-all bg-black/20 hover:bg-black/40 backdrop-blur-lg border-2 border-white/20"
                     aria-label="Next image"
                   >
                     <ChevronRight className="h-8 w-8 sm:h-10 sm:w-10" />

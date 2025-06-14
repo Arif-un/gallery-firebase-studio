@@ -4,7 +4,7 @@
 import React from 'react';
 import { Responsive, WidthProvider, Layout, Layouts } from 'react-grid-layout';
 import NextImage from 'next/image'; // Renamed to avoid conflict if Image is imported from lucide
-import { X, Move, Share, Eye, GripVertical } from 'lucide-react';
+import { X, Share, Eye, GripVertical } from 'lucide-react';
 import type { UploadedImage, CustomLayoutItem } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -78,7 +78,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
             <Button
               variant="ghost"
               size="icon"
-              className="absolute top-2 right-2 z-10 bg-black/30 hover:bg-destructive/80 hover:text-destructive-foreground text-white/80 opacity-0 group-hover:opacity-100 transition-opacity rounded-full p-2 h-8 w-8 backdrop-blur-sm border border-white/20 flex items-center justify-center"
+              className="absolute top-2 right-2 z-10 text-white/80 opacity-0 group-hover:opacity-100 transition-opacity rounded-full p-2 h-8 w-8 flex items-center justify-center bg-black/20 hover:bg-destructive/80 hover:text-destructive-foreground backdrop-blur-lg border-2 border-white/20"
               onClick={(e) => {
                 e.stopPropagation(); 
                 onImageRemove(image.id);
@@ -94,7 +94,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="bg-black/40 hover:bg-primary/80 text-white/90 rounded-full p-1.5 h-7 w-7 backdrop-blur-sm border border-white/20 flex items-center justify-center"
+                  className="text-white/90 rounded-full p-1.5 h-7 w-7 flex items-center justify-center bg-black/20 hover:bg-primary/80 backdrop-blur-lg border-2 border-white/20"
                   onClick={(e) => { e.stopPropagation(); onImagePreview(image.id); }}
                   aria-label={`Preview ${image.name}`}
                 >
@@ -103,8 +103,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
                 <Button 
                   variant="ghost"
                   size="icon" 
-                  className="bg-black/40 hover:bg-primary/80 text-white/90 rounded-full p-1.5 h-7 w-7 backdrop-blur-sm border border-white/20 flex items-center justify-center"
-                  // Add onClick for share functionality if needed
+                  className="text-white/90 rounded-full p-1.5 h-7 w-7 flex items-center justify-center bg-black/20 hover:bg-primary/80 backdrop-blur-lg border-2 border-white/20"
                   aria-label={`Share ${image.name}`}
                 >
                   <Share className='h-4 w-4' />
