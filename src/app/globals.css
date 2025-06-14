@@ -174,9 +174,6 @@ body {
   opacity: 0; /* Start transparent */
   transition: opacity 0.2s ease-in-out; /* Smooth transition for opacity */
   
-  /* On group hover, it appears and becomes opaque */
-  @apply group-hover:block group-hover:opacity-100;
-
   /* Override the width:0, height:0 from the generic .react-resizable-handle */
   width: 2.25rem !important;
   height: 2.25rem !important;
@@ -185,8 +182,8 @@ body {
   right: 0.5rem !important;
   bottom: 0.5rem !important;
 
-  /* Visuals */
-  @apply cursor-se-resize border-2 border-white/20 bg-black/20 backdrop-blur rounded-full flex items-center justify-center;
+  /* Visuals & Group Hover effects*/
+  @apply group-hover:block group-hover:opacity-100 cursor-se-resize border-2 border-white/20 bg-black/20 backdrop-blur rounded-full flex items-center justify-center;
 }
 
 /* Icon for the SE handle */
@@ -229,4 +226,5 @@ body {
     
 
     
+
 
