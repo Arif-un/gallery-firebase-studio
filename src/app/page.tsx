@@ -338,26 +338,28 @@ export default function IGalleryPage() {
                   </Button>
                 )}
 
-                <div 
-                  className={cn(
-                    "relative w-full h-full", // Added w-full h-full
-                    "max-w-full max-h-[calc(100vh_-_12rem)]", 
-                    "bg-black/5 dark:bg-white/5 backdrop-blur-sm rounded-xl shadow-2xl p-3",
-                    "border border-white/10 dark:border-black/10"
-                  )}
-                >
-                  <Image
-                    key={previewImage.id}
-                    src={previewImage.src}
-                    alt={previewImage.name}
-                    fill 
-                    className="object-contain rounded-lg" 
-                    sizes="(max-width: 768px) 90vw, (max-width: 1200px) 80vw, 70vw" 
-                    data-ai-hint={previewImage.aiHint}
-                    unoptimized 
-                    priority={currentPreviewIndex === images.findIndex(img => img.id === previewImage.id)}
-                  />
+                {/* Outer Sizing Wrapper */}
+                <div className="relative w-full h-full max-w-full max-h-[calc(100vh_-_12rem)]">
+                  {/* Inner Styled Wrapper (New) */}
+                  <div className={cn(
+                    "relative w-full h-full p-2 rounded-xl overflow-hidden",
+                    "bg-black/20 dark:bg-white/10 backdrop-blur-md", 
+                    "shadow-2xl border border-white/5" 
+                  )}>
+                    <Image
+                      key={previewImage.id}
+                      src={previewImage.src}
+                      alt={previewImage.name}
+                      fill
+                      className="object-contain rounded-lg" 
+                      sizes="(max-width: 768px) 90vw, (max-width: 1200px) 80vw, 70vw" 
+                      data-ai-hint={previewImage.aiHint}
+                      unoptimized 
+                      priority={currentPreviewIndex === images.findIndex(img => img.id === previewImage.id)}
+                    />
+                  </div>
                 </div>
+                
 
                 {images.length > 1 && (
                   <Button
