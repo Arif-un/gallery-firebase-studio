@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import type { UploadedImage } from '@/types';
 import type { Layout, Layouts } from 'react-grid-layout';
 import ImageUploader from '@/components/ImageUploader';
@@ -13,11 +13,78 @@ const DEFAULT_ITEM_WIDTH = 4; // In grid units
 const DEFAULT_ROW_HEIGHT = 30; // In pixels, ensure this matches ImageGrid's rowHeight
 const COLS = { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }; // Match ImageGrid's cols
 
+// Helper function to generate layout items, can be used for initial state and dynamic additions
+const generateLayoutItem = (
+  image: UploadedImage,
+  existingLayout: Layout[] = []
+): Layout => {
+  const aspectRatio = image.width / image.height;
+  // Estimate width based on a typical large screen scenario for column calculation
+  const approximateColWidthLg = 1200 / COLS.lg; // Assuming 1200px container for 'lg'
+  const estimatedPixelWidth = DEFAULT_ITEM_WIDTH * approximateColWidthLg;
+  const estimatedPixelHeight = estimatedPixelWidth / aspectRatio;
+  const h = Math.max(2, Math.ceil(estimatedPixelHeight / (DEFAULT_ROW_HEIGHT + 10 /* marginY, from RGL config */)));
+
+  let yPos = 0;
+  if (existingLayout.length > 0) {
+    // Find the maximum y + h to place the new item below others
+    yPos = Math.max(...existingLayout.map(item => item.y + item.h), 0);
+  }
+  // Calculate x position to wrap items in rows
+  const itemsInCurrentPotentialRow = existingLayout.filter(item => item.y === yPos);
+  let xPos = 0;
+  if(itemsInCurrentPotentialRow.length > 0){
+    xPos = itemsInCurrentPotentialRow.reduce((sum, item) => sum + item.w, 0) % COLS.lg;
+  }
+   // If xPos + new item width exceeds COLS.lg, move to next row
+  if (xPos + DEFAULT_ITEM_WIDTH > COLS.lg) {
+    yPos = yPos + h; // Or some minimum height if h is too large for a new row start
+    xPos = 0;
+  }
+
+
+  return {
+    i: image.id,
+    x: xPos,
+    y: yPos,
+    w: DEFAULT_ITEM_WIDTH,
+    h: h,
+    minW: 2,
+    minH: 2,
+  };
+};
+
+const defaultImagesSeed: Omit<UploadedImage, 'id' | 'type'>[] = [
+  { src: 'https://placehold.co/800x500.png', name: 'Mountain Vista', width: 800, height: 500, aiHint: 'mountain vista' },
+  { src: 'https://placehold.co/400x600.png', name: 'Forest Trail', width: 400, height: 600, aiHint: 'forest trail' },
+  { src: 'https://placehold.co/700x450.png', name: 'Sunset Beach', width: 700, height: 450, aiHint: 'sunset beach' },
+  { src: 'https://placehold.co/600x700.png', name: 'Desert Mirage', width: 600, height: 700, aiHint: 'desert mirage' },
+];
+
+const initialImages: UploadedImage[] = defaultImagesSeed.map((img, index) => ({
+  ...img,
+  id: `default-image-${index + 1}`,
+  type: 'image/png',
+}));
+
+const initialLayoutsLg: Layout[] = [];
+let tempCurrentLayoutForInit: Layout[] = [];
+initialImages.forEach(img => {
+  const layoutItem = generateLayoutItem(img, tempCurrentLayoutForInit);
+  initialLayoutsLg.push(layoutItem);
+  // Add to temp layout for correct yPos calculation for subsequent items
+  // This ensures items are stacked correctly initially
+  tempCurrentLayoutForInit.push(layoutItem);
+});
+
+
 export default function IGalleryPage() {
-  const [images, setImages] = useState<UploadedImage[]>([]);
-  const [layouts, setLayouts] = useState<Layouts>({ lg: [] });
+  const [images, setImages] = useState<UploadedImage[]>(initialImages);
+  const [layouts, setLayouts] = useState<Layouts>({ lg: initialLayoutsLg });
   const [mounted, setMounted] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+   const defaultsInitializedRef = useRef(false);
+
 
   useEffect(() => {
     setMounted(true);
@@ -29,7 +96,40 @@ export default function IGalleryPage() {
       setTheme('dark');
       document.documentElement.classList.add('dark');
     }
+
+    // Check if defaults need to be initialized (e.g. if localStorage was empty or cleared)
+    // This is a simplified check; a more robust solution might involve checking if `initialImages` were truly the source
+    if (images.length === 0 && (!layouts.lg || layouts.lg.length === 0) && !defaultsInitializedRef.current) {
+        const derivedInitialImages: UploadedImage[] = defaultImagesSeed.map((img, index) => ({
+            ...img,
+            id: `default-image-${index + 1}`, // ensure unique IDs if this runs multiple times
+            type: 'image/png',
+        }));
+        
+        const derivedInitialLayoutsLg: Layout[] = [];
+        let tempLayout: Layout[] = [];
+        derivedInitialImages.forEach(img => {
+            const layoutItem = calculateInitialLayoutItem(img, tempLayout); // Use the hook here
+            derivedInitialLayoutsLg.push(layoutItem);
+            tempLayout.push(layoutItem);
+        });
+        setImages(derivedInitialImages);
+        setLayouts({ lg: derivedInitialLayoutsLg });
+        defaultsInitializedRef.current = true;
+    }
+
+  }, []); // Empty dependency array for one-time mount effects
+
+
+  const calculateInitialLayoutItem = useCallback((
+    image: UploadedImage,
+    existingLayout: Layout[] = []
+  ): Layout => {
+    // This is the hook version, can be kept if dynamic additions need it,
+    // but initial state uses generateLayoutItem. For consistency, it uses the same logic.
+    return generateLayoutItem(image, existingLayout);
   }, []);
+
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -38,41 +138,9 @@ export default function IGalleryPage() {
     document.documentElement.classList.toggle('dark', newTheme === 'dark');
   };
 
-  const calculateInitialLayoutItem = useCallback((
-    image: UploadedImage,
-    existingLayout: Layout[] = []
-  ): Layout => {
-    const aspectRatio = image.width / image.height;
-    // Estimate width based on a typical large screen scenario for column calculation
-    // This could be improved by using actual container width at the time of calculation if possible,
-    // but for initial placement, this approximation is often sufficient.
-    const approximateColWidthLg = 1200 / COLS.lg; // Assuming 1200px container for 'lg'
-    const estimatedPixelWidth = DEFAULT_ITEM_WIDTH * approximateColWidthLg;
-    const estimatedPixelHeight = estimatedPixelWidth / aspectRatio;
-    const h = Math.max(2, Math.ceil(estimatedPixelHeight / (DEFAULT_ROW_HEIGHT + 10 /* marginY, from RGL config */)));
-
-    let yPos = 0;
-    if (existingLayout.length > 0) {
-      yPos = Math.max(...existingLayout.map(item => item.y + item.h), 0);
-    }
-    const xPos = (existingLayout.filter(item => item.y === yPos).reduce((sum, item) => sum + item.w, 0)) % COLS.lg;
-
-    return {
-      i: image.id,
-      x: xPos,
-      y: yPos,
-      w: DEFAULT_ITEM_WIDTH,
-      h: h,
-      minW: 2,
-      minH: 2,
-    };
-  }, []);
-
-
   const handleUploads = useCallback((newImages: UploadedImage[]) => {
     setImages(prevImages => {
       const updatedImages = [...prevImages];
-      // Filter out any images that might already exist by ID
       const uniqueNewImages = newImages.filter(img => !prevImages.some(pi => pi.id === img.id));
       updatedImages.push(...uniqueNewImages);
       return updatedImages;
@@ -80,39 +148,44 @@ export default function IGalleryPage() {
 
     setLayouts(prevLayouts => {
       const newLayoutsState: Layouts = {};
-      // Ensure all existing breakpoint arrays are new instances
+      // Deep copy all existing breakpoint layouts
       for (const bk in prevLayouts) {
         if (Object.prototype.hasOwnProperty.call(prevLayouts, bk)) {
           newLayoutsState[bk as keyof Layouts] = prevLayouts[bk as keyof Layouts] ? [...prevLayouts[bk as keyof Layouts]!] : [];
         }
       }
       
-      // Ensure 'lg' layout array exists and is a new instance
       if (!newLayoutsState.lg) {
         newLayoutsState.lg = [];
       }
-      const currentLgLayoutForNewItems = newLayoutsState.lg!;
+      // Use a mutable copy for calculating positions of new items within this batch
+      const currentLgLayoutForNewItemsCalculation = [...newLayoutsState.lg!]; 
 
       const itemsLayoutToAdd: Layout[] = [];
       newImages.forEach(img => {
-        // Check if this image (by ID) already has a layout item in the current 'lg' state
-        // This prevents adding duplicate layout items if an image was somehow re-processed
-        if (!currentLgLayoutForNewItems.find(item => item.i === img.id)) {
-            // Pass the 'currentLgLayoutForNewItems' which is the accumulating layout for this update batch
-            itemsLayoutToAdd.push(calculateInitialLayoutItem(img, currentLgLayoutForNewItems));
+        if (!currentLgLayoutForNewItemsCalculation.find(item => item.i === img.id)) {
+            const newLayoutItem = calculateInitialLayoutItem(img, currentLgLayoutForNewItemsCalculation);
+            itemsLayoutToAdd.push(newLayoutItem);
+            currentLgLayoutForNewItemsCalculation.push(newLayoutItem); // Add to temp layout for next item
         }
       });
       
-      // Add new items to the 'lg' layout. RGL will derive for other breakpoints.
-      newLayoutsState.lg = [...currentLgLayoutForNewItems, ...itemsLayoutToAdd];
-      
+      newLayoutsState.lg = [...newLayoutsState.lg!, ...itemsLayoutToAdd];
       return newLayoutsState;
     });
   }, [calculateInitialLayoutItem]);
 
   const onLayoutChange = useCallback((currentLayout: Layout[], allLayouts: Layouts) => {
-    setLayouts(allLayouts);
-  }, []);
+    // Only update if allLayouts actually contains data.
+    // This check prevents resetting layouts if `allLayouts` is empty during an intermediate state.
+    const hasRelevantLayouts = Object.values(allLayouts).some(layoutArray => layoutArray.length > 0);
+    if (images.length > 0 && hasRelevantLayouts) {
+         setLayouts(allLayouts);
+    } else if (images.length === 0) {
+        // If all images are removed, layouts should be empty
+        setLayouts({ lg: [] });
+    }
+  }, [images.length]);
 
   const handleImageRemove = useCallback((imageId: string) => {
     setImages(prevImages => prevImages.filter(img => img.id !== imageId));
@@ -121,11 +194,14 @@ export default function IGalleryPage() {
       for (const breakpointKey in prevLayouts) {
         if (Object.prototype.hasOwnProperty.call(prevLayouts, breakpointKey)) {
           const castedBreakpointKey = breakpointKey as keyof Layouts;
-          // Filter out the item from each breakpoint's layout array
           newLayoutsState[castedBreakpointKey] = (prevLayouts[castedBreakpointKey] || []).filter(
             (layoutItem: Layout) => layoutItem.i !== imageId
           );
         }
+      }
+      // If after removal, lg is empty, ensure other breakpoints are also cleared or consistent
+      if (newLayoutsState.lg && newLayoutsState.lg.length === 0) {
+        return { lg: [] }; // Reset all if the primary layout (lg) becomes empty
       }
       return newLayoutsState;
     });
@@ -133,7 +209,7 @@ export default function IGalleryPage() {
 
   const handleRemoveAllImages = () => {
     setImages([]);
-    setLayouts({ lg: [] }); // Reset all layouts, effectively clearing all breakpoints
+    setLayouts({ lg: [] });
   };
 
   if (!mounted) {
