@@ -10,7 +10,7 @@ import Url from '@uppy/url';
 import GoogleDrive from '@uppy/google-drive';
 import Dropbox from '@uppy/dropbox';
 import Instagram from '@uppy/instagram';
-import Webcam from '@uppy/webcam'; // Keep for type, Dashboard will init
+// Webcam plugin is managed by Dashboard
 
 import type { UploadedImage } from '@/types';
 import { useToast } from '@/hooks/use-toast';
@@ -18,11 +18,8 @@ import { useToast } from '@/hooks/use-toast';
 // Import Uppy CSS
 import '@uppy/core/dist/style.min.css';
 import '@uppy/dashboard/dist/style.min.css';
-import '@uppy/drag-drop/dist/style.min.css'; // Dashboard will handle DragDrop UI
-import '@uppy/file-input/dist/style.min.css'; // Dashboard will handle FileInput UI
 import '@uppy/progress-bar/dist/style.min.css';
 import '@uppy/url/dist/style.min.css';
-import '@uppy/webcam/dist/style.min.css'; // Dashboard will handle Webcam UI
 
 
 interface ImageUploaderProps {
@@ -43,29 +40,19 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onUploadComplete }) => {
       },
     });
 
-    // Plugins managed by Dashboard (DragDrop, FileInput, Webcam) are specified in Dashboard's `plugins` prop.
-    // Only initialize plugins here that are not directly part of Dashboard's UI plugin set or need specific core config.
     uppyInstance
       .use(ProgressBar, { target: 'body', hideAfterFinish: true })
-      .use(Url, { companionUrl: 'https://companion.uppy.io' }) // Uppy's demo companion
-      // For GoogleDrive, Dropbox, Instagram, a Companion server is typically needed.
-      // Using Uppy's public companion for demo purposes.
-      // Replace with your own companion instance in production.
+      .use(Url, { companionUrl: 'https://companion.uppy.io' })
       .use(GoogleDrive, { companionUrl: 'https://companion.uppy.io' })
       .use(Dropbox, { companionUrl: 'https://companion.uppy.io' })
       .use(Instagram, { companionUrl: 'https://companion.uppy.io' });
-      // Webcam plugin is listed in Dashboard plugins prop, so it will be initialized by Dashboard.
-      // If specific core-level Webcam options were needed beyond what Dashboard offers, you might .use(Webcam) here
-      // but without a 'target' if Dashboard is also listing it.
-      // For this case, relying on Dashboard's plugin management is cleaner.
-
+      
     return uppyInstance;
   }, []);
 
   useEffect(() => {
     const handleComplete = (result: { successful: any[]; failed: any[] }) => {
       const { successful, failed } = result;
-      const uploadedImages: UploadedImage[] = [];
 
       if (failed.length > 0) {
         toast({
@@ -73,6 +60,18 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onUploadComplete }) => {
           title: 'Upload Error',
           description: `${failed.length} files failed to upload. Please check file types and sizes.`,
         });
+      }
+
+      if (successful.length === 0 && failed.length > 0) {
+        // If only failures, reset immediately
+        uppy.reset();
+        return;
+      }
+      
+      if (successful.length === 0) {
+        // No successful files to process, reset if not already handled by failure case
+        uppy.reset();
+        return;
       }
 
       const imagePromises = successful.map(file => {
@@ -93,7 +92,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onUploadComplete }) => {
               };
               img.onerror = () => {
                 console.error("Error loading image for dimensions: ", file.name);
-                resolve(null); // Resolve with null if image can't be loaded
+                resolve(null); 
               }
               img.src = e.target?.result as string;
             };
@@ -103,7 +102,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onUploadComplete }) => {
             }
             reader.readAsDataURL(file.data);
           } else {
-            resolve(null); // Not an image file
+            resolve(null); 
           }
         });
       });
@@ -113,7 +112,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onUploadComplete }) => {
         if (validImages.length > 0) {
           onUploadComplete(validImages);
         }
-        uppy.reset(); // Reset Uppy after processing
       }).catch(error => {
         console.error("Error processing uploaded files: ", error);
         toast({
@@ -121,6 +119,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onUploadComplete }) => {
           title: 'Processing Error',
           description: 'There was an issue processing uploaded images.',
         });
+      }).finally(() => {
+        // Always reset Uppy after attempting to process files
+        uppy.reset(); 
       });
     };
 
@@ -128,7 +129,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onUploadComplete }) => {
 
     return () => {
       uppy.off('complete', handleComplete);
-      // uppy.close(); // Not needed for useMemo instance, it cleans up itself
     };
   }, [uppy, onUploadComplete, toast]);
 
@@ -139,18 +139,16 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onUploadComplete }) => {
       proudlyDisplayPoweredByUppy={false}
       width="100%"
       height={400}
-      theme="light" // or 'dark' or 'auto'
+      theme="light" 
       note="Images only, up to 10MB each, max 10 files."
       showProgressDetails={true}
       browserBackButtonClose={true}
       locale={{
         strings: {
-          // You can customize strings here
           dropPasteImport: 'Drag & drop images here, paste, or %{browse}',
           browse: 'browse your computer',
         },
       }}
-      // Apply some Tailwind classes for iOS feel
       className="[&_.uppy-Dashboard-inner]:rounded-lg [&_.uppy-Dashboard-AddFiles]:border-2 [&_.uppy-Dashboard-AddFiles]:border-dashed [&_.uppy-Dashboard-AddFiles]:border-primary/50 [&_.uppy-Dashboard-AddFiles]:bg-primary/5"
     />
   );
