@@ -322,6 +322,8 @@ export default function IGalleryPage() {
               onLayoutChange={onLayoutChange} 
               onImageRemove={handleImageRemove}
               onImagePreview={handleOpenPreview}
+              rowHeight={DEFAULT_ROW_HEIGHT}
+              cols={COLS}
             />
           )}
         </section>
@@ -359,7 +361,7 @@ export default function IGalleryPage() {
                   </Button>
                 )}
 
-                <div className="relative w-full max-w-3xl lg:max-w-4xl xl:max-w-5xl h-full max-h-[70vh] sm:max-h-[75vh] flex items-center justify-center frosted-glass rounded-xl shadow-2xl p-3">
+                <div className="relative w-full max-w-3xl lg:max-w-4xl xl:max-w-5xl h-full max-h-[70vh] sm:max-h-[75vh] flex items-center justify-center bg-black/5 dark:bg-white/5 backdrop-blur-sm rounded-xl shadow-2xl p-3 border border-white/10 dark:border-black/10">
                   <Image
                     src={previewImage.src}
                     alt={previewImage.name}
