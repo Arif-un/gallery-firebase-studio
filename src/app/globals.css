@@ -151,7 +151,7 @@ body {
 }
 .react-resizable-handle::after {
   content: '';
-  @apply absolute block w-3 h-3 bg-accent rounded-full border-2 border-background shadow-md;
+  @apply absolute block w-4 h-4 bg-primary rounded-full border-2 border-background shadow-lg;
 }
 .react-resizable-handle-se::after {
   @apply bottom-0 right-0 cursor-se-resize;
