@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { Responsive, WidthProvider, Layout, Layouts } from 'react-grid-layout';
-import NextImage from 'next/image'; // Renamed to avoid conflict if Image is imported from lucide
+import NextImage from 'next/image';
 import { X, Share, Eye, GripVertical } from 'lucide-react';
 import type { UploadedImage, CustomLayoutItem } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -38,9 +38,9 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
       layouts={layouts}
       breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
       cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
-      rowHeight={30} 
-      margin={[10, 10]} 
-      containerPadding={[10, 10]} 
+      rowHeight={30}
+      margin={[10, 10]}
+      containerPadding={[10, 10]}
       onLayoutChange={onLayoutChange}
       isDraggable
       isResizable
@@ -53,10 +53,10 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
         const imageProps: Record<string, any> = {
           src: image.src,
           alt: image.name,
-          fill: true, 
+          fill: true,
           sizes: "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
-          className: "rounded-lg transition-transform duration-300 group-hover:scale-105 object-cover",
-          unoptimized: true, 
+          className: "rounded-lg transition-all duration-300 group-hover:scale-105 object-cover group-hover:blur-sm",
+          unoptimized: true,
         };
 
         if (image.aiHint) {
@@ -66,7 +66,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
         return (
           <div key={item.i} data-grid={item} className="group relative overflow-hidden rounded-lg shadow-md bg-card">
             <Card className="w-full h-full flex flex-col overflow-hidden border-0 shadow-none">
-              <div 
+              <div
                 className="draggable-handle absolute top-2 left-1/2 transform -translate-x-1/2 z-20 p-1.5 backdrop-blur-sm border border-white/20 cursor-grab bg-black/30 hover:bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               >
                 <GripVertical className="size-4 text-white/80" />
@@ -80,29 +80,30 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
               size="icon"
               className="absolute top-2 right-2 z-10 text-white/80 opacity-0 group-hover:opacity-100 transition-opacity rounded-full p-2 h-8 w-8 flex items-center justify-center bg-black/20 hover:bg-destructive/80 hover:text-destructive-foreground backdrop-blur-lg border-2 border-white/20"
               onClick={(e) => {
-                e.stopPropagation(); 
+                e.stopPropagation();
                 onImageRemove(image.id);
               }}
               aria-label={`Remove ${image.name}`}
             >
               <X className="h-4 w-4" />
             </Button>
-            
-            <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex justify-between items-center">
+
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 text-white/90 opacity-0 group-hover:opacity-100 transition-all rounded-full p-3 h-12 w-12 flex items-center justify-center bg-black/20 hover:bg-primary/80 backdrop-blur-lg border-2 border-white/20"
+              onClick={(e) => { e.stopPropagation(); onImagePreview(image.id); }}
+              aria-label={`Preview ${image.name}`}
+            >
+              <Eye className="h-6 w-6" />
+            </Button>
+
+            <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex justify-between items-center z-10">
               <span className="text-white text-xs sm:text-sm font-semibold truncate pr-1">{image.name}</span>
               <div className="flex gap-1 sm:gap-2">
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-white/90 rounded-full p-1.5 h-7 w-7 flex items-center justify-center bg-black/20 hover:bg-primary/80 backdrop-blur-lg border-2 border-white/20"
-                  onClick={(e) => { e.stopPropagation(); onImagePreview(image.id); }}
-                  aria-label={`Preview ${image.name}`}
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant="ghost"
-                  size="icon" 
                   className="text-white/90 rounded-full p-1.5 h-7 w-7 flex items-center justify-center bg-black/20 hover:bg-primary/80 backdrop-blur-lg border-2 border-white/20"
                   aria-label={`Share ${image.name}`}
                 >
