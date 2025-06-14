@@ -128,7 +128,7 @@ body {
 
 /* React Grid Layout custom styling */
 .react-grid-layout {
-  @apply relative transition-height duration-200 ease-in-out;
+  @apply relative transition-all duration-200 ease-in-out;
 }
 .react-grid-item {
   @apply transition-all duration-200 ease-in-out;
