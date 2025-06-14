@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from 'react';
-import type { UploadedImage, CustomLayoutItem } from '@/types';
+import type { UploadedImage } from '@/types';
 import type { Layout, Layouts } from 'react-grid-layout';
 import ImageUploader from '@/components/ImageUploader';
 import ImageGrid from '@/components/ImageGrid';
@@ -38,85 +38,105 @@ export default function IGalleryPage() {
     document.documentElement.classList.toggle('dark', newTheme === 'dark');
   };
 
-  const calculateInitialLayoutItem = (
+  const calculateInitialLayoutItem = useCallback((
     image: UploadedImage,
     existingLayout: Layout[] = []
   ): Layout => {
-    // Simplified calculation for h - assumes colWidth is roughly (containerWidth / cols)
-    // A more precise colWidth would require knowing current containerWidth and breakpoint.
-    // For demo, let's estimate aspect ratio relative to a fixed width.
     const aspectRatio = image.width / image.height;
-    const estimatedPixelWidth = DEFAULT_ITEM_WIDTH * (1200 / COLS.lg); // Approximate pixel width for 'lg'
+    // Estimate width based on a typical large screen scenario for column calculation
+    // This could be improved by using actual container width at the time of calculation if possible,
+    // but for initial placement, this approximation is often sufficient.
+    const approximateColWidthLg = 1200 / COLS.lg; // Assuming 1200px container for 'lg'
+    const estimatedPixelWidth = DEFAULT_ITEM_WIDTH * approximateColWidthLg;
     const estimatedPixelHeight = estimatedPixelWidth / aspectRatio;
-    const h = Math.max(2, Math.ceil(estimatedPixelHeight / (DEFAULT_ROW_HEIGHT + 10 /* marginY */)));
+    const h = Math.max(2, Math.ceil(estimatedPixelHeight / (DEFAULT_ROW_HEIGHT + 10 /* marginY, from RGL config */)));
 
-    // Find the next available position (simple vertical stacking)
     let yPos = 0;
     if (existingLayout.length > 0) {
       yPos = Math.max(...existingLayout.map(item => item.y + item.h), 0);
     }
     const xPos = (existingLayout.filter(item => item.y === yPos).reduce((sum, item) => sum + item.w, 0)) % COLS.lg;
 
-
     return {
       i: image.id,
       x: xPos,
-      y: yPos, // Place new items at the bottom
+      y: yPos,
       w: DEFAULT_ITEM_WIDTH,
       h: h,
       minW: 2,
       minH: 2,
     };
-  };
+  }, []);
 
 
   const handleUploads = useCallback((newImages: UploadedImage[]) => {
     setImages(prevImages => {
       const updatedImages = [...prevImages];
-      const newImageIds = new Set(newImages.map(img => img.id));
-      // Filter out any images that might already exist by ID, though Uppy should provide unique IDs
+      // Filter out any images that might already exist by ID
       const uniqueNewImages = newImages.filter(img => !prevImages.some(pi => pi.id === img.id));
       updatedImages.push(...uniqueNewImages);
       return updatedImages;
     });
 
     setLayouts(prevLayouts => {
-      const newLayoutItems: Layout[] = [];
-      const currentLgLayout = prevLayouts.lg ? [...prevLayouts.lg] : [];
+      const newLayoutsState: Layouts = {};
+      // Ensure all existing breakpoint arrays are new instances
+      for (const bk in prevLayouts) {
+        if (Object.prototype.hasOwnProperty.call(prevLayouts, bk)) {
+          newLayoutsState[bk as keyof Layouts] = prevLayouts[bk as keyof Layouts] ? [...prevLayouts[bk as keyof Layouts]!] : [];
+        }
+      }
       
+      // Ensure 'lg' layout array exists and is a new instance
+      if (!newLayoutsState.lg) {
+        newLayoutsState.lg = [];
+      }
+      const currentLgLayoutForNewItems = newLayoutsState.lg!;
+
+      const itemsLayoutToAdd: Layout[] = [];
       newImages.forEach(img => {
-        if (!currentLgLayout.find(item => item.i === img.id)) { // Avoid duplicates
-            newLayoutItems.push(calculateInitialLayoutItem(img, currentLgLayout));
+        // Check if this image (by ID) already has a layout item in the current 'lg' state
+        // This prevents adding duplicate layout items if an image was somehow re-processed
+        if (!currentLgLayoutForNewItems.find(item => item.i === img.id)) {
+            // Pass the 'currentLgLayoutForNewItems' which is the accumulating layout for this update batch
+            itemsLayoutToAdd.push(calculateInitialLayoutItem(img, currentLgLayoutForNewItems));
         }
       });
-
-      const updatedLgLayout = [...currentLgLayout, ...newLayoutItems];
       
-      return { ...prevLayouts, lg: updatedLgLayout };
+      // Add new items to the 'lg' layout. RGL will derive for other breakpoints.
+      newLayoutsState.lg = [...currentLgLayoutForNewItems, ...itemsLayoutToAdd];
+      
+      return newLayoutsState;
     });
-  }, []);
+  }, [calculateInitialLayoutItem]);
 
   const onLayoutChange = useCallback((currentLayout: Layout[], allLayouts: Layouts) => {
-    // This callback provides layout for the current breakpoint.
-    // We update allLayouts directly for ResponsiveGridLayout to manage.
     setLayouts(allLayouts);
   }, []);
 
   const handleImageRemove = useCallback((imageId: string) => {
     setImages(prevImages => prevImages.filter(img => img.id !== imageId));
     setLayouts(prevLayouts => {
-      const newLgLayout = prevLayouts.lg?.filter(item => item.i !== imageId) || [];
-      return { ...prevLayouts, lg: newLgLayout };
+      const newLayoutsState: Layouts = {};
+      for (const breakpointKey in prevLayouts) {
+        if (Object.prototype.hasOwnProperty.call(prevLayouts, breakpointKey)) {
+          const castedBreakpointKey = breakpointKey as keyof Layouts;
+          // Filter out the item from each breakpoint's layout array
+          newLayoutsState[castedBreakpointKey] = (prevLayouts[castedBreakpointKey] || []).filter(
+            (layoutItem: Layout) => layoutItem.i !== imageId
+          );
+        }
+      }
+      return newLayoutsState;
     });
   }, []);
 
   const handleRemoveAllImages = () => {
     setImages([]);
-    setLayouts({ lg: [] });
+    setLayouts({ lg: [] }); // Reset all layouts, effectively clearing all breakpoints
   };
 
   if (!mounted) {
-    // Avoid hydration mismatch by not rendering Uppy/RGL until client-side mounted
     return <div className="min-h-screen bg-background flex items-center justify-center"><p>Loading iGallery...</p></div>;
   }
 
