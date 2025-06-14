@@ -325,7 +325,7 @@ export default function IGalleryPage() {
                 </Button>
               </DialogClose>
 
-              <div className="relative flex items-center justify-center w-full flex-grow mb-4 overflow-hidden">
+              <div className="relative flex items-center justify-center w-full flex-grow mb-4 overflow-y-auto">
                 {images.length > 1 && (
                   <Button
                     variant="ghost"
@@ -339,10 +339,10 @@ export default function IGalleryPage() {
                 )}
 
                 {/* Outer Sizing Wrapper */}
-                <div className="relative w-full h-full max-w-full max-h-[calc(100vh_-_12rem)]">
+                <div className="relative w-3/4 max-h-[calc(100vh_-_12rem)]"> {/* Width 75%, max height constrained */}
                   {/* Inner Styled Wrapper (New) */}
                   <div className={cn(
-                    "relative w-full h-full p-2 rounded-xl overflow-hidden",
+                    "relative w-full h-auto p-2 rounded-xl overflow-hidden", // h-auto to wrap image content
                     "bg-black/20 dark:bg-white/10 backdrop-blur-md", 
                     "shadow-2xl border border-white/5" 
                   )}>
@@ -350,9 +350,10 @@ export default function IGalleryPage() {
                       key={previewImage.id}
                       src={previewImage.src}
                       alt={previewImage.name}
-                      fill
-                      className="object-contain rounded-lg" 
-                      sizes="(max-width: 768px) 90vw, (max-width: 1200px) 80vw, 70vw" 
+                      width={previewImage.width}
+                      height={previewImage.height}
+                      className="block object-contain rounded-lg w-full h-auto" 
+                      sizes="(max-width: 768px) 75vw, 75vw" 
                       data-ai-hint={previewImage.aiHint}
                       unoptimized 
                       priority={currentPreviewIndex === images.findIndex(img => img.id === previewImage.id)}
