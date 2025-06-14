@@ -8,7 +8,7 @@ import ImageUploader from '@/components/ImageUploader';
 import ImageGrid from '@/components/ImageGrid';
 import { Button } from '@/components/ui/button';
 import { Sun, Moon, Trash2, ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { Dialog, DialogContent, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogClose, DialogTitle } from '@/components/ui/dialog';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
@@ -140,6 +140,7 @@ export default function IGalleryPage() {
 
     setLayouts(prevLayouts => {
       const newLayoutsState: Layouts = {};
+      // Ensure all existing breakpoint arrays are copied as new arrays
       (Object.keys(COLS) as Array<keyof typeof COLS>).forEach(bk => {
         newLayoutsState[bk] = prevLayouts[bk] ? [...prevLayouts[bk]!] : [];
       });
@@ -155,15 +156,9 @@ export default function IGalleryPage() {
         }
       });
       
-      (Object.keys(newLayoutsState) as Array<keyof Layouts>).forEach(breakpointKey => {
-        if (breakpointKey === 'lg') {
-          newLayoutsState.lg = [...(newLayoutsState.lg || []), ...itemsLayoutToAdd];
-        } else {
-          // For other breakpoints, ResponsiveGridLayout will derive them if not present
-          // or we can explicitly try to derive if necessary, but usually it's handled.
-          // For simplicity, we are only explicitly adding to 'lg'.
-        }
-      });
+      // Add new items only to the 'lg' layout; ResponsiveGridLayout handles others
+      newLayoutsState.lg = [...(newLayoutsState.lg || []), ...itemsLayoutToAdd];
+      
       return newLayoutsState;
     });
   }, [calculateInitialLayoutItem]);
@@ -181,12 +176,14 @@ export default function IGalleryPage() {
     setImages(prevImages => prevImages.filter(img => img.id !== imageId));
     setLayouts(prevLayouts => {
       const newLayoutsState: Layouts = {};
+      // Ensure all breakpoint arrays are processed
       (Object.keys(prevLayouts) as Array<keyof Layouts>).forEach(breakpointKey => {
         newLayoutsState[breakpointKey] = (prevLayouts[breakpointKey] || []).filter(
           (layoutItem: Layout) => layoutItem.i !== imageId
         );
       });
-      if (newLayoutsState.lg && newLayoutsState.lg.length === 0 && images.filter(img => img.id !== imageId).length === 0) {
+      // Check if after removal the gallery is empty
+      if (images.filter(img => img.id !== imageId).length === 0) {
         return { lg: [], md: [], sm: [], xs: [], xxs: [] };
       }
       return newLayoutsState;
@@ -322,6 +319,7 @@ export default function IGalleryPage() {
       {previewImage && (
         <Dialog open={currentPreviewIndex !== null} onOpenChange={(isOpen) => !isOpen && handleClosePreview()}>
           <DialogContent className="p-0 m-0 w-screen h-screen max-w-none bg-black/80 backdrop-blur-lg border-none rounded-none flex items-center justify-center outline-none ring-0 focus:ring-0">
+            <DialogTitle className="sr-only">{previewImage.name}</DialogTitle>
             <div className="relative flex flex-col items-center justify-center w-full h-full p-4">
               <DialogClose asChild>
                 <Button variant="ghost" size="icon" className="absolute top-4 right-4 z-50 text-white hover:bg-white/20 rounded-full">
