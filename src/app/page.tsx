@@ -7,7 +7,7 @@ import type { Layout, Layouts } from 'react-grid-layout';
 import ImageUploader from '@/components/ImageUploader';
 import ImageGrid from '@/components/ImageGrid';
 import { Button } from '@/components/ui/button';
-import { Sun, Moon, Trash2, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Sun, Moon, ChevronLeft, ChevronRight, X, Shuffle as ShuffleIcon } from 'lucide-react';
 import { Dialog, DialogContent, DialogClose, DialogTitle } from '@/components/ui/dialog';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
@@ -15,17 +15,23 @@ import { cn } from '@/lib/utils';
 const DEFAULT_ITEM_WIDTH = 4; 
 const DEFAULT_ROW_HEIGHT = 30; 
 const COLS = { lg: 32, md: 24, sm: 16, xs: 12, xxs: 10 };
+const MARGIN_BETWEEN_ITEMS = 10;
 
 const generateLayoutItem = (
   image: UploadedImage,
-  existingLayout: Layout[] = []
+  existingLayout: Layout[] = [],
+  itemWidth: number = DEFAULT_ITEM_WIDTH,
+  colsForBreakpoint: number = COLS.lg
 ): Layout => {
   const aspectRatio = image.width / image.height;
-  const approximateColWidthLg = (1200 - (COLS.lg + 1) * 10) / COLS.lg; 
-  const estimatedPixelWidth = DEFAULT_ITEM_WIDTH * approximateColWidthLg;
+  // Approximate calculation, assuming a common grid width for 'lg' or using passed cols
+  const approximateGridPixelWidth = 1200; // Or derive more dynamically if possible
+  const approximateColPixelWidth = (approximateGridPixelWidth - (colsForBreakpoint + 1) * MARGIN_BETWEEN_ITEMS) / colsForBreakpoint; 
+  
+  const estimatedPixelWidth = itemWidth * approximateColPixelWidth;
   const estimatedPixelHeight = estimatedPixelWidth / aspectRatio;
   
-  const h = Math.max(2, Math.ceil(estimatedPixelHeight / (DEFAULT_ROW_HEIGHT + 10 )));
+  const h = Math.max(2, Math.ceil(estimatedPixelHeight / (DEFAULT_ROW_HEIGHT + MARGIN_BETWEEN_ITEMS)));
 
   let yPos = 0;
   if (existingLayout.length > 0) {
@@ -35,10 +41,10 @@ const generateLayoutItem = (
   const itemsInCurrentPotentialRow = existingLayout.filter(item => item.y === yPos);
   let xPos = 0;
   if(itemsInCurrentPotentialRow.length > 0){
-    xPos = itemsInCurrentPotentialRow.reduce((sum, item) => sum + item.w, 0) % COLS.lg;
+    xPos = itemsInCurrentPotentialRow.reduce((sum, item) => sum + item.w, 0) % colsForBreakpoint;
   }
  
-  if (xPos + DEFAULT_ITEM_WIDTH > COLS.lg) {
+  if (xPos + itemWidth > colsForBreakpoint) {
     yPos = yPos + Math.max(...itemsInCurrentPotentialRow.map(i => i.h), h); 
     xPos = 0; 
   }
@@ -47,7 +53,7 @@ const generateLayoutItem = (
     i: image.id,
     x: xPos,
     y: yPos,
-    w: DEFAULT_ITEM_WIDTH,
+    w: itemWidth,
     h: h,
     minW: 4, 
     minH: 2, 
@@ -187,10 +193,38 @@ export default function IGalleryPage() {
     });
   }, [images, setImages, setLayouts]); 
 
-  const handleRemoveAllImages = () => {
-    setImages([]);
-    setLayouts({ lg: [], md: [], sm: [], xs: [], xxs: [] });
-  };
+  const handleShuffle = useCallback(() => {
+    if (images.length === 0) return;
+
+    const shuffledImagesOrder = [...images].sort(() => Math.random() - 0.5);
+
+    const newLgLayout: Layout[] = shuffledImagesOrder.map(image => {
+      const numCols = COLS.lg;
+      const minGridW = 4;
+      const maxGridW = Math.max(minGridW, Math.floor(numCols * 0.375)); // Max width up to 12/32
+      const newW = Math.floor(Math.random() * (maxGridW - minGridW + 1)) + minGridW;
+
+      const approximateGridPixelWidth = 1200; 
+      const approximateColPixelWidth = (approximateGridPixelWidth - (numCols + 1) * MARGIN_BETWEEN_ITEMS) / numCols;
+      
+      const estimatedPixelWidth = newW * approximateColPixelWidth;
+      const estimatedPixelHeight = (image.height / image.width) * estimatedPixelWidth;
+      const newH = Math.max(2, Math.ceil(estimatedPixelHeight / (DEFAULT_ROW_HEIGHT + MARGIN_BETWEEN_ITEMS)));
+
+      return {
+        i: image.id,
+        w: newW,
+        h: newH,
+        x: Math.floor(Math.random() * (numCols - newW + 1)), // Random x, ensuring it fits
+        y: Infinity, // Let RGL compact vertically
+        minW: 4,
+        minH: 2,
+      };
+    });
+
+    setLayouts({ lg: newLgLayout });
+  }, [images, setLayouts]);
+
 
   const handleOpenPreview = useCallback((imageId: string) => {
       const imageIndex = images.findIndex(img => img.id === imageId);
@@ -295,8 +329,8 @@ export default function IGalleryPage() {
               Your Collection
             </h2>
             {images.length > 0 && (
-              <Button variant="destructive" onClick={handleRemoveAllImages} size="sm">
-                <Trash2 className="mr-2 h-4 w-4" /> Clear All
+              <Button variant="outline" onClick={handleShuffle} size="sm">
+                <ShuffleIcon className="mr-2 h-4 w-4" /> Shuffle
               </Button>
             )}
           </div>
@@ -444,4 +478,6 @@ export default function IGalleryPage() {
     </div>
   );
 }
+    
+
     
