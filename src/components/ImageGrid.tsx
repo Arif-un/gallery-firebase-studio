@@ -59,7 +59,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
           <div key={image.id} className="group relative overflow-hidden rounded-lg shadow-md bg-card">
             <Card className="w-full h-full flex flex-col overflow-hidden border-0 shadow-none">
               <div
-                className="draggable-handle absolute top-2 left-1/2 transform -translate-x-1/2 z-20 p-1.5 backdrop-blur-lg border-2 border-white/20 cursor-grab bg-black/30 hover:bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                className="draggable-handle absolute top-2 left-2 z-20 p-1.5 backdrop-blur-lg border-2 border-white/20 cursor-grab bg-black/30 hover:bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               >
                 <Move className="size-4 text-white/80" />
               </div>
