@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils';
 const DEFAULT_ITEM_WIDTH = 4; 
 const DEFAULT_ROW_HEIGHT = 30; 
 const COLS = { lg: 32, md: 24, sm: 16, xs: 12, xxs: 10 };
-const MARGIN_BETWEEN_ITEMS = 10;
+const MARGIN_BETWEEN_ITEMS = 10; // This matches RGL's default margin if not overridden
 
 const generateLayoutItem = (
   image: UploadedImage,
@@ -25,13 +25,18 @@ const generateLayoutItem = (
 ): Layout => {
   const aspectRatio = image.width / image.height;
   // Approximate calculation, assuming a common grid width for 'lg' or using passed cols
-  const approximateGridPixelWidth = 1200; // Or derive more dynamically if possible
-  const approximateColPixelWidth = (approximateGridPixelWidth - (colsForBreakpoint + 1) * MARGIN_BETWEEN_ITEMS) / colsForBreakpoint; 
+  // This is a rough estimate for initial height calculation.
+  // A 1200px grid width, 32 cols, 10px margin: (1200 - (32+1)*10) / 32 ~= 27px per col unit width
+  const approximateColPixelWidth = (1200 - (colsForBreakpoint + 1) * MARGIN_BETWEEN_ITEMS) / colsForBreakpoint; 
   
   const estimatedPixelWidth = itemWidth * approximateColPixelWidth;
   const estimatedPixelHeight = estimatedPixelWidth / aspectRatio;
   
-  const h = Math.max(2, Math.ceil(estimatedPixelHeight / (DEFAULT_ROW_HEIGHT + MARGIN_BETWEEN_ITEMS)));
+  // Calculate height in grid units. Each grid unit height is rowHeight (30px) + margin (10px) = 40px total slot.
+  // So, h = estimatedPixelHeight / (rowHeight_prop_in_RGL)
+  // RGL rowHeight prop is 30. The margin is handled by RGL between items.
+  const h = Math.max(2, Math.ceil(estimatedPixelHeight / DEFAULT_ROW_HEIGHT));
+
 
   let yPos = 0;
   if (existingLayout.length > 0) {
@@ -174,8 +179,12 @@ export default function IGalleryPage() {
   }, [calculateInitialLayoutItem]);
 
   const onLayoutChange = useCallback((currentLayout: Layout[], allLayouts: Layouts) => {
-    setLayouts(allLayouts);
-  }, [setLayouts]); 
+    // Only update if the layout has actually changed to prevent infinite loops
+    // This basic check might need to be more sophisticated if issues persist
+    if (JSON.stringify(allLayouts) !== JSON.stringify(layouts)) {
+      setLayouts(allLayouts);
+    }
+  }, [layouts]); // Add layouts to dependency array
 
   const handleImageRemove = useCallback((imageId: string) => {
     setImages(prevImages => prevImages.filter(img => img.id !== imageId));
@@ -187,43 +196,42 @@ export default function IGalleryPage() {
         );
       });
       if (images.filter(img => img.id !== imageId).length === 0) {
+        // If all images are removed, reset all breakpoint layouts to empty arrays
         return { lg: [], md: [], sm: [], xs: [], xxs: [] };
       }
       return newLayoutsState;
     });
-  }, [images, setImages, setLayouts]); 
+  }, [images, setImages, setLayouts]); // Added images, setImages, setLayouts to dependency array
 
   const handleShuffle = useCallback(() => {
     if (images.length === 0) return;
 
     const shuffledImagesOrder = [...images].sort(() => Math.random() - 0.5);
+    const numCols = COLS.lg; // Use lg breakpoint for generating base random layout
 
-    const newLgLayout: Layout[] = shuffledImagesOrder.map(image => {
-      const numCols = COLS.lg;
-      const minGridW = 4;
-      const maxGridW = Math.max(minGridW, Math.floor(numCols * 0.375)); // Max width up to 12/32
+    const minGridW = 4; 
+    const maxGridW = Math.max(minGridW, Math.floor(numCols * 0.375)); // Max width e.g., 12 cols for 32 total
+
+    const minGridH = 4; // Min height in grid units (rowHeight is 30px per unit)
+    const maxGridH = 10; // Max height in grid units
+
+    const newLgLayout: Layout[] = shuffledImagesOrder.map((image) => {
       const newW = Math.floor(Math.random() * (maxGridW - minGridW + 1)) + minGridW;
-
-      const approximateGridPixelWidth = 1200; 
-      const approximateColPixelWidth = (approximateGridPixelWidth - (numCols + 1) * MARGIN_BETWEEN_ITEMS) / numCols;
-      
-      const estimatedPixelWidth = newW * approximateColPixelWidth;
-      const estimatedPixelHeight = (image.height / image.width) * estimatedPixelWidth;
-      const newH = Math.max(2, Math.ceil(estimatedPixelHeight / (DEFAULT_ROW_HEIGHT + MARGIN_BETWEEN_ITEMS)));
+      const newH = Math.floor(Math.random() * (maxGridH - minGridH + 1)) + minGridH;
 
       return {
         i: image.id,
         w: newW,
         h: newH,
-        x: Math.floor(Math.random() * (numCols - newW + 1)), // Random x, ensuring it fits
+        x: 0, // Let RGL place items from left
         y: Infinity, // Let RGL compact vertically
-        minW: 4,
-        minH: 2,
+        minW: 4, // Minimum width constraint for resizing
+        minH: 2, // Minimum height constraint for resizing
       };
     });
 
-    setLayouts({ lg: newLgLayout });
-  }, [images, setLayouts]);
+    setLayouts({ lg: newLgLayout }); // Update only 'lg', RGL will derive others
+  }, [images]); // Dependency: images array for shuffling
 
 
   const handleOpenPreview = useCallback((imageId: string) => {
@@ -282,7 +290,8 @@ export default function IGalleryPage() {
     }
 
     let startIndex = currentPreviewIndex - halfPoint;
-    let endIndex = currentPreviewIndex + halfPoint + (images.length % 2 === 0 ? 0 : 1); 
+    let endIndex = currentPreviewIndex + halfPoint + (totalThumbnails % 2 !== 0 || images.length % 2 === 0 ? 1 : 0) ;
+
 
     if (startIndex < 0) {
       endIndex -= startIndex; 
@@ -293,7 +302,11 @@ export default function IGalleryPage() {
       endIndex = images.length;
     }
     
+    // Ensure startIndex is not negative if images.length is small
     startIndex = Math.max(0, startIndex);
+    // Ensure endIndex does not exceed images.length
+    endIndex = Math.min(images.length, endIndex);
+
 
     return images.slice(startIndex, endIndex);
   };
@@ -478,6 +491,8 @@ export default function IGalleryPage() {
     </div>
   );
 }
+    
+
     
 
     
