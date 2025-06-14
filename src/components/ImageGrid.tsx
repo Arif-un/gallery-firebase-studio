@@ -98,18 +98,18 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
               <Eye className="h-6 w-6" />
             </Button>
 
-            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 p-2 bg-black/20 backdrop-blur-lg border border-white/20 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 z-10">
-              <span className="text-white text-xs sm:text-sm font-semibold truncate pr-1">{image.name}</span>
-              <div className="flex gap-1 sm:gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-white/90 rounded-full p-1.5 h-7 w-7 flex items-center justify-center bg-black/20 hover:bg-primary/80 backdrop-blur-lg border-2 border-white/20"
-                  aria-label={`Share ${image.name}`}
-                >
-                  <Share className='h-4 w-4' />
-                </Button>
+            <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 z-10">
+              <div className="p-2 bg-black/20 backdrop-blur-lg border border-white/20 rounded-md">
+                <span className="text-white text-xs sm:text-sm font-semibold truncate">{image.name}</span>
               </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-white/90 rounded-full p-1.5 h-7 w-7 flex items-center justify-center bg-black/20 hover:bg-black/30 backdrop-blur-lg border-2 border-white/20"
+                aria-label={`Share ${image.name}`}
+              >
+                <Share className='h-4 w-4' />
+              </Button>
             </div>
           </div>
         );
@@ -119,6 +119,3 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
 };
 
 export default ImageGrid;
-
-
-    
