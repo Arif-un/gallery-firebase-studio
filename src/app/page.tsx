@@ -21,14 +21,11 @@ const generateLayoutItem = (
   existingLayout: Layout[] = []
 ): Layout => {
   const aspectRatio = image.width / image.height;
-  // Estimate column width for 'lg' breakpoint, assuming a common container width like 1200px.
-  // This is a rough guide for initial height calculation.
-  const approximateColWidthLg = (1200 - (COLS.lg + 1) * 10) / COLS.lg; // (containerWidth - (cols + 1) * margin) / cols
+  const approximateColWidthLg = (1200 - (COLS.lg + 1) * 10) / COLS.lg; 
   const estimatedPixelWidth = DEFAULT_ITEM_WIDTH * approximateColWidthLg;
   const estimatedPixelHeight = estimatedPixelWidth / aspectRatio;
   
-  // Calculate height in terms of rowHeight units, including margin/padding considerations
-  const h = Math.max(2, Math.ceil(estimatedPixelHeight / (DEFAULT_ROW_HEIGHT + 10 /* row margin */)));
+  const h = Math.max(2, Math.ceil(estimatedPixelHeight / (DEFAULT_ROW_HEIGHT + 10 )));
 
 
   let yPos = 0;
@@ -144,10 +141,7 @@ export default function IGalleryPage() {
     });
 
     setLayouts(prevLayouts => {
-      const newLayoutsState: Layouts = {};
-      (Object.keys(COLS) as Array<keyof typeof COLS>).forEach(bk => {
-        newLayoutsState[bk] = prevLayouts[bk] ? [...prevLayouts[bk]!] : [];
-      });
+      const newLayoutsState: Layouts = { ...prevLayouts };
       
       let currentLgLayoutForNewItemsCalculation = newLayoutsState.lg ? [...newLayoutsState.lg] : [];
 
@@ -160,20 +154,18 @@ export default function IGalleryPage() {
         }
       });
       
-      newLayoutsState.lg = [...(newLayoutsState.lg || []), ...itemsLayoutToAdd];
+      if (!newLayoutsState.lg) newLayoutsState.lg = [];
+      newLayoutsState.lg = [...newLayoutsState.lg, ...itemsLayoutToAdd];
       
+      // For other breakpoints, ResponsiveGridLayout will attempt to adapt from 'lg' if they don't exist
+      // or you can implement logic to generate them specifically here if needed.
       return newLayoutsState;
     });
   }, [calculateInitialLayoutItem]);
 
   const onLayoutChange = useCallback((currentLayout: Layout[], allLayouts: Layouts) => {
-    const hasRelevantLayouts = Object.values(allLayouts).some(layoutArray => layoutArray.length > 0);
-    if (images.length > 0 && hasRelevantLayouts) {
-         setLayouts(allLayouts);
-    } else if (images.length === 0) {
-        setLayouts({ lg: [], md: [], sm: [], xs: [], xxs: [] });
-    }
-  }, [images.length]);
+    setLayouts(allLayouts);
+  }, [setLayouts]);
 
   const handleImageRemove = useCallback((imageId: string) => {
     setImages(prevImages => prevImages.filter(img => img.id !== imageId));
@@ -189,7 +181,7 @@ export default function IGalleryPage() {
       }
       return newLayoutsState;
     });
-  }, [images]);
+  }, [images]); // images dependency is needed here for the filter check
 
   const handleRemoveAllImages = () => {
     setImages([]);
@@ -252,18 +244,17 @@ export default function IGalleryPage() {
     }
 
     let startIndex = currentPreviewIndex - halfPoint;
-    let endIndex = currentPreviewIndex + halfPoint + (images.length % 2 === 0 ? 0 : 1); // Adjust for even/odd total
+    let endIndex = currentPreviewIndex + halfPoint + (images.length % 2 === 0 ? 0 : 1); 
 
     if (startIndex < 0) {
-      endIndex -= startIndex; // Shift end index by the same amount
+      endIndex -= startIndex; 
       startIndex = 0;
     }
     if (endIndex > images.length) {
-      startIndex -= (endIndex - images.length); // Shift start index
+      startIndex -= (endIndex - images.length); 
       endIndex = images.length;
     }
     
-    // Ensure startIndex is not negative after adjustments
     startIndex = Math.max(0, startIndex);
 
     return images.slice(startIndex, endIndex);
@@ -325,7 +316,7 @@ export default function IGalleryPage() {
         <Dialog open={currentPreviewIndex !== null} onOpenChange={(isOpen) => !isOpen && handleClosePreview()}>
           <DialogContent className={cn(
             "p-0 m-0 w-screen h-screen max-w-none border-none rounded-none flex items-center justify-center outline-none ring-0 focus:ring-0",
-            "frosted-glass" // Apply frosted glass to the entire dialog
+            "frosted-glass"
             )}>
             <DialogTitle className="sr-only">{previewImage.name}</DialogTitle>
             <div className="relative flex flex-col items-center justify-center w-full h-full p-4">
@@ -436,3 +427,4 @@ export default function IGalleryPage() {
     </div>
   );
 }
+    
