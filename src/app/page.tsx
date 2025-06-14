@@ -7,9 +7,10 @@ import type { Layout, Layouts } from 'react-grid-layout';
 import ImageUploader from '@/components/ImageUploader';
 import ImageGrid from '@/components/ImageGrid';
 import { Button } from '@/components/ui/button';
-import { Sun, Moon, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Sun, Moon, Trash2, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Dialog, DialogContent, DialogClose } from '@/components/ui/dialog';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
 const DEFAULT_ITEM_WIDTH = 4; 
 const DEFAULT_ROW_HEIGHT = 30; 
@@ -57,6 +58,7 @@ const defaultImagesSeed: Omit<UploadedImage, 'id' | 'type'>[] = [
   { src: 'https://placehold.co/400x600.png', name: 'Forest Trail', width: 400, height: 600, aiHint: 'deep forest' },
   { src: 'https://placehold.co/700x450.png', name: 'Sunset Beach', width: 700, height: 450, aiHint: 'tropical sunset' },
   { src: 'https://placehold.co/600x700.png', name: 'Desert Mirage', width: 600, height: 700, aiHint: 'sand dunes' },
+  { src: 'https://placehold.co/500x800.png', name: 'City Skyline', width: 500, height: 800, aiHint: 'city night' },
 ];
 
 const initialImages: UploadedImage[] = defaultImagesSeed.map((img, index) => ({
@@ -138,7 +140,6 @@ export default function IGalleryPage() {
 
     setLayouts(prevLayouts => {
       const newLayoutsState: Layouts = {};
-      // Ensure all breakpoints are initialized as new arrays
       (Object.keys(COLS) as Array<keyof typeof COLS>).forEach(bk => {
         newLayoutsState[bk] = prevLayouts[bk] ? [...prevLayouts[bk]!] : [];
       });
@@ -154,7 +155,15 @@ export default function IGalleryPage() {
         }
       });
       
-      newLayoutsState.lg = [...(newLayoutsState.lg || []), ...itemsLayoutToAdd];
+      (Object.keys(newLayoutsState) as Array<keyof Layouts>).forEach(breakpointKey => {
+        if (breakpointKey === 'lg') {
+          newLayoutsState.lg = [...(newLayoutsState.lg || []), ...itemsLayoutToAdd];
+        } else {
+          // For other breakpoints, ResponsiveGridLayout will derive them if not present
+          // or we can explicitly try to derive if necessary, but usually it's handled.
+          // For simplicity, we are only explicitly adding to 'lg'.
+        }
+      });
       return newLayoutsState;
     });
   }, [calculateInitialLayoutItem]);
@@ -177,7 +186,6 @@ export default function IGalleryPage() {
           (layoutItem: Layout) => layoutItem.i !== imageId
         );
       });
-      // If lg becomes empty, reset all to ensure consistency, especially if other breakpoints might not have been explicitly cleared.
       if (newLayoutsState.lg && newLayoutsState.lg.length === 0 && images.filter(img => img.id !== imageId).length === 0) {
         return { lg: [], md: [], sm: [], xs: [], xxs: [] };
       }
@@ -235,10 +243,31 @@ export default function IGalleryPage() {
     };
   }, [currentPreviewIndex, handleNextPreview, handlePrevPreview, handleClosePreview]);
 
-  const previewImage = currentPreviewIndex !== null ? images[currentPreviewIndex] : null;
-  const nextImage = currentPreviewIndex !== null && images.length > 0 ? images[(currentPreviewIndex + 1) % images.length] : null;
-  const prevImage = currentPreviewIndex !== null && images.length > 0 ? images[(currentPreviewIndex - 1 + images.length) % images.length] : null;
 
+  const getThumbnailsForPreview = (): UploadedImage[] => {
+    if (!images.length || currentPreviewIndex === null) return [];
+    const totalThumbnails = 5; 
+    const halfPoint = Math.floor(totalThumbnails / 2);
+
+    if (images.length <= totalThumbnails) {
+      return images;
+    }
+
+    let startIndex = currentPreviewIndex - halfPoint;
+    let endIndex = currentPreviewIndex + halfPoint + 1; 
+
+    if (startIndex < 0) {
+      startIndex = 0;
+      endIndex = totalThumbnails;
+    } else if (endIndex > images.length) {
+      endIndex = images.length;
+      startIndex = images.length - totalThumbnails;
+    }
+    
+    return images.slice(startIndex, endIndex);
+  };
+
+  const previewImage = currentPreviewIndex !== null ? images[currentPreviewIndex] : null;
 
   if (!mounted) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><p>Loading iGallery...</p></div>;
@@ -292,62 +321,81 @@ export default function IGalleryPage() {
 
       {previewImage && (
         <Dialog open={currentPreviewIndex !== null} onOpenChange={(isOpen) => !isOpen && handleClosePreview()}>
-          <DialogContent className="w-full max-w-xl md:max-w-2xl lg:max-w-4xl xl:max-w-5xl p-0 bg-card/90 backdrop-blur-lg border-border rounded-xl overflow-hidden shadow-2xl">
-            <DialogHeader className="p-4 border-b border-border">
-              <DialogTitle className="text-lg font-medium text-foreground truncate">{previewImage.name}</DialogTitle>
-            </DialogHeader>
-            
-            <div className="relative w-full aspect-video max-h-[calc(100vh-220px)] sm:max-h-[calc(100vh-250px)] flex items-center justify-center p-1 bg-black/5">
-              <Image
-                src={previewImage.src}
-                alt={previewImage.name}
-                fill
-                className="object-contain"
-                data-ai-hint={previewImage.aiHint}
-                unoptimized
-              />
-            </div>
+          <DialogContent className="p-0 m-0 w-screen h-screen max-w-none bg-black/80 backdrop-blur-lg border-none rounded-none flex items-center justify-center outline-none ring-0 focus:ring-0">
+            <div className="relative flex flex-col items-center justify-center w-full h-full p-4">
+              <DialogClose asChild>
+                <Button variant="ghost" size="icon" className="absolute top-4 right-4 z-50 text-white hover:bg-white/20 rounded-full">
+                  <X className="h-6 w-6" />
+                </Button>
+              </DialogClose>
 
-            <DialogFooter className="p-3 sm:p-4 flex justify-between items-center bg-background/70 backdrop-blur-sm rounded-b-xl border-t border-border">
-              <div className="w-1/3 flex justify-start">
-                {images.length > 1 && prevImage && (
+              <div className="relative flex items-center justify-center w-full flex-grow mb-4">
+                {images.length > 1 && (
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={handlePrevPreview}
-                    aria-label={`Previous image: ${prevImage.name}`}
-                    className="p-0 h-10 w-10 sm:h-12 sm:w-12 relative rounded-md overflow-hidden group border-2 border-transparent hover:border-primary focus-visible:border-primary transition-all"
+                    className="absolute left-2 sm:left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white transition-all"
+                    aria-label="Previous image"
                   >
-                    <Image src={prevImage.src} alt={prevImage.name} layout="fill" objectFit="cover" className="group-hover:opacity-80 transition-opacity" unoptimized />
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                    <ChevronLeft className="h-8 w-8 sm:h-10 sm:w-10" />
                   </Button>
                 )}
-              </div>
 
-              <div className="flex items-center gap-2">
-                <Button variant="outline" onClick={handlePrevPreview} disabled={images.length <= 1} aria-label="Previous image" className="rounded-full h-10 w-10 sm:h-12 sm:w-12">
-                  <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
-                </Button>
-                <Button variant="outline" onClick={handleNextPreview} disabled={images.length <= 1} aria-label="Next image" className="rounded-full h-10 w-10 sm:h-12 sm:w-12">
-                  <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
-                </Button>
-              </div>
+                <div className="relative w-full max-w-3xl lg:max-w-4xl xl:max-w-5xl h-full max-h-[70vh] sm:max-h-[75vh] flex items-center justify-center">
+                  <Image
+                    src={previewImage.src}
+                    alt={previewImage.name}
+                    fill
+                    className="object-contain rounded-lg shadow-2xl"
+                    data-ai-hint={previewImage.aiHint}
+                    unoptimized
+                  />
+                </div>
 
-              <div className="w-1/3 flex justify-end">
-                {images.length > 1 && nextImage && (
-                   <Button
+                {images.length > 1 && (
+                  <Button
                     variant="ghost"
                     size="icon"
                     onClick={handleNextPreview}
-                    aria-label={`Next image: ${nextImage.name}`}
-                    className="p-0 h-10 w-10 sm:h-12 sm:w-12 relative rounded-md overflow-hidden group border-2 border-transparent hover:border-primary focus-visible:border-primary transition-all"
+                    className="absolute right-2 sm:right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white transition-all"
+                    aria-label="Next image"
                   >
-                    <Image src={nextImage.src} alt={nextImage.name} layout="fill" objectFit="cover" className="group-hover:opacity-80 transition-opacity" unoptimized />
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                    <ChevronRight className="h-8 w-8 sm:h-10 sm:w-10" />
                   </Button>
                 )}
               </div>
-            </DialogFooter>
+
+              {images.length > 1 && (
+                <div className="flex-shrink-0 w-full max-w-md sm:max-w-lg md:max-w-xl flex justify-center items-end gap-2 sm:gap-3 p-2 h-[100px] sm:h-[120px]">
+                  {getThumbnailsForPreview().map((thumbImage) => (
+                    <button
+                      key={thumbImage.id}
+                      onClick={() => setCurrentPreviewIndex(images.findIndex(img => img.id === thumbImage.id))}
+                      className={cn(
+                        "relative rounded-md overflow-hidden transition-all duration-200 ease-in-out aspect-square",
+                        "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black/50",
+                        thumbImage.id === previewImage.id
+                          ? "w-20 h-20 sm:w-24 sm:h-24 ring-2 ring-primary shadow-xl border-2 border-primary"
+                          : "w-14 h-14 sm:w-16 sm:h-16 opacity-70 hover:opacity-100 hover:scale-105 border-2 border-transparent hover:border-gray-400"
+                      )}
+                      aria-label={`View image ${thumbImage.name}`}
+                    >
+                      <Image
+                        src={thumbImage.src}
+                        alt={thumbImage.name}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
+                       {thumbImage.id === previewImage.id && (
+                         <div className="absolute inset-0 bg-primary/30" />
+                       )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </DialogContent>
         </Dialog>
       )}
@@ -377,3 +425,4 @@ export default function IGalleryPage() {
     </div>
   );
 }
+
