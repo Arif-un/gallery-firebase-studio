@@ -4,7 +4,7 @@
 import React from 'react';
 import { Responsive, WidthProvider, Layout, Layouts } from 'react-grid-layout';
 import Image from 'next/image';
-import { XCircle, GripVertical } from 'lucide-react'; // Added GripVertical
+import { XCircle, GripVertical } from 'lucide-react';
 import type { UploadedImage, CustomLayoutItem } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -44,25 +44,21 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
       onLayoutChange={onLayoutChange}
       isDraggable
       isResizable
-      draggableHandle=".draggable-handle" // This remains the same
+      draggableHandle=".draggable-handle"
     >
       {layouts.lg?.map((item: CustomLayoutItem) => { // Use lg layout for rendering, RGL will adapt
         const image = imageMap.get(item.i);
         if (!image) return null;
 
         return (
-          // Removed draggable-handle and cursor-grab from this main div
           <div key={item.i} data-grid={item} className="group relative overflow-hidden rounded-lg shadow-md bg-card">
             <Card className="w-full h-full flex flex-col overflow-hidden border-0 shadow-none">
-              {/* START: Added Draggable Handle */}
               <div 
                 className="draggable-handle absolute top-2 left-1/2 transform -translate-x-1/2 z-20 p-1 cursor-grab bg-black/30 hover:bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                onClick={(e) => e.stopPropagation()} // Prevent click from bubbling further if needed
-                onMouseDown={(e) => e.stopPropagation()} // Prevent card click events if any are added later
+                onClick={(e) => e.stopPropagation()} 
               >
                 <GripVertical className="h-5 w-5 text-white" />
               </div>
-              {/* END: Added Draggable Handle */}
               <CardContent className="p-0 flex-grow relative">
                 <Image
                   src={image.src}
