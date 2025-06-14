@@ -56,8 +56,8 @@ const generateLayoutItem = (
     y: yPos,
     w: DEFAULT_ITEM_WIDTH,
     h: h,
-    minW: 4, // Minimum width of 4 columns
-    minH: 2, // Minimum height of 2 rows
+    minW: 4, 
+    minH: 2, 
   };
 };
 
@@ -359,12 +359,12 @@ export default function IGalleryPage() {
                   </Button>
                 )}
 
-                <div className="relative w-full max-w-3xl lg:max-w-4xl xl:max-w-5xl h-full max-h-[70vh] sm:max-h-[75vh] flex items-center justify-center">
+                <div className="relative w-full max-w-3xl lg:max-w-4xl xl:max-w-5xl h-full max-h-[70vh] sm:max-h-[75vh] flex items-center justify-center frosted-glass rounded-xl shadow-2xl p-3">
                   <Image
                     src={previewImage.src}
                     alt={previewImage.name}
                     fill
-                    className="object-contain rounded-lg shadow-2xl"
+                    className="object-contain rounded-lg"
                     data-ai-hint={previewImage.aiHint}
                     unoptimized 
                   />
