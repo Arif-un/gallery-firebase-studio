@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -58,8 +59,8 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
                   src={image.src}
                   alt={image.name}
                   layout="fill"
-                  objectFit="contain" // Preserves aspect ratio, fits within bounds
-                  className="rounded-t-lg transition-transform duration-300 group-hover:scale-105"
+                  objectFit="cover" // Changed from "contain" to "cover"
+                  className="rounded-lg transition-transform duration-300 group-hover:scale-105" // Applied rounded-lg to image as well
                   unoptimized // If using data URLs frequently, to avoid Next.js optimization limits
                 />
               </CardContent>
