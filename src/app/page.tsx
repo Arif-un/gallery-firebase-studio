@@ -339,7 +339,7 @@ export default function IGalleryPage() {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="absolute top-4 right-4 z-50 text-white rounded-full p-2 bg-black/20 hover:bg-black/30 backdrop-blur-lg border-2 border-white/20"
+                  className="absolute top-4 right-4 z-50 text-white rounded-full p-2 bg-black/20 hover:bg-black/30 backdrop-blur-lg border-2 border-white/5"
                   aria-label="Close preview"
                 >
                   <X className="h-6 w-6" />
@@ -352,7 +352,7 @@ export default function IGalleryPage() {
                     variant="ghost"
                     size="icon"
                     onClick={handlePrevPreview}
-                    className="absolute left-2 sm:left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full text-white transition-all bg-black/20 hover:bg-black/40 backdrop-blur-lg border-2 border-white/20"
+                    className="absolute left-2 sm:left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full text-white transition-all bg-black/20 hover:bg-black/40 backdrop-blur-lg border-2 border-white/5"
                     aria-label="Previous image"
                   >
                     <ChevronLeft className="h-8 w-8 sm:h-10 sm:w-10" />
@@ -375,7 +375,7 @@ export default function IGalleryPage() {
                     variant="ghost"
                     size="icon"
                     onClick={handleNextPreview}
-                    className="absolute right-2 sm:right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full text-white transition-all bg-black/20 hover:bg-black/40 backdrop-blur-lg border-2 border-white/20"
+                    className="absolute right-2 sm:right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full text-white transition-all bg-black/20 hover:bg-black/40 backdrop-blur-lg border-2 border-white/5"
                     aria-label="Next image"
                   >
                     <ChevronRight className="h-8 w-8 sm:h-10 sm:w-10" />
@@ -394,7 +394,7 @@ export default function IGalleryPage() {
                         "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black/50", 
                         thumbImage.id === previewImage.id
                           ? "w-20 h-20 sm:w-24 sm:h-24 ring-2 ring-primary shadow-xl border-2 border-primary" 
-                          : "w-14 h-14 sm:w-16 sm:h-16 opacity-70 hover:opacity-100 hover:scale-105 border-2 border-transparent hover:border-gray-400" 
+                          : "w-14 h-14 sm:w-16 sm:h-16 opacity-70 hover:opacity-100 hover:scale-105 border-2 border-white/5 hover:border-gray-400" 
                       )}
                       aria-label={`View image ${thumbImage.name}`}
                     >

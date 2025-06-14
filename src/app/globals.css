@@ -183,7 +183,7 @@ body {
   bottom: 0.5rem !important;
 
   /* Visuals & Group Hover effects*/
-  @apply group-hover:block group-hover:opacity-100 cursor-se-resize border-2 border-white/20 bg-black/20 backdrop-blur rounded-full flex items-center justify-center;
+  @apply group-hover:block group-hover:opacity-100 cursor-se-resize border-2 border-white/5 bg-black/20 backdrop-blur rounded-full flex items-center justify-center;
 }
 
 /* Icon for the SE handle */
@@ -226,5 +226,6 @@ body {
     
 
     
+
 
 

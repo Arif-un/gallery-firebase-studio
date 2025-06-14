@@ -59,7 +59,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
           <div key={image.id} className="group relative overflow-hidden rounded-lg shadow-md bg-card">
             <Card className="w-full h-full flex flex-col overflow-hidden border-0 shadow-none">
               <div
-                className="draggable-handle absolute top-2 left-2 z-20 p-1.5 backdrop-blur-lg border-2 border-white/20 cursor-grab bg-black/30 hover:bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                className="draggable-handle absolute top-2 left-2 z-20 p-1.5 backdrop-blur-lg border-2 border-white/5 cursor-grab bg-black/30 hover:bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               >
                 <Move className="size-4 text-white/80" />
               </div>
@@ -70,7 +70,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
             <Button
               variant="ghost"
               size="icon"
-              className="absolute top-2 right-2 z-10 text-white/80 opacity-0 group-hover:opacity-100 transition-opacity rounded-full p-2 h-8 w-8 flex items-center justify-center bg-black/20 hover:bg-destructive/80 hover:text-destructive-foreground backdrop-blur-lg border-2 border-white/20"
+              className="absolute top-2 right-2 z-10 text-white/80 opacity-0 group-hover:opacity-100 transition-opacity rounded-full p-2 h-8 w-8 flex items-center justify-center bg-black/20 hover:bg-destructive/80 hover:text-destructive-foreground backdrop-blur-lg border-2 border-white/5"
               onClick={(e) => {
                 e.stopPropagation(); 
                 onImageRemove(image.id);
@@ -83,7 +83,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
             <Button
               variant="ghost"
               size="icon"
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 text-white/90 opacity-0 group-hover:opacity-100 transition-all rounded-full p-3 h-12 w-12 flex items-center justify-center bg-black/20 hover:bg-primary/80 backdrop-blur-lg border-2 border-white/20"
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 text-white/90 opacity-0 group-hover:opacity-100 transition-all rounded-full p-3 h-12 w-12 flex items-center justify-center bg-black/20 hover:bg-primary/80 backdrop-blur-lg border-2 border-white/5"
               onClick={(e) => { e.stopPropagation(); onImagePreview(image.id); }}
               aria-label={`Preview ${image.name}`}
             >
@@ -91,13 +91,13 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
             </Button>
 
             <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 z-10">
-              <div className="p-2 bg-black/20 backdrop-blur-lg border-2 border-white/20 rounded-md">
+              <div className="p-2 bg-black/20 backdrop-blur-lg border-2 border-white/5 rounded-md">
                 <span className="text-white text-xs sm:text-sm font-semibold truncate">{image.name}</span>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-white/90 rounded-full p-1.5 h-7 w-7 flex items-center justify-center bg-black/20 hover:bg-black/30 backdrop-blur-lg border-2 border-white/20"
+                className="text-white/90 rounded-full p-1.5 h-7 w-7 flex items-center justify-center bg-black/20 hover:bg-black/30 backdrop-blur-lg border-2 border-white/5"
                 aria-label={`Share ${image.name}`}
                 onClick={(e) => e.stopPropagation()} 
               >
