@@ -21,10 +21,15 @@ const generateLayoutItem = (
   existingLayout: Layout[] = []
 ): Layout => {
   const aspectRatio = image.width / image.height;
-  const approximateColWidthLg = 1200 / COLS.lg; 
+  // Estimate column width for 'lg' breakpoint, assuming a common container width like 1200px.
+  // This is a rough guide for initial height calculation.
+  const approximateColWidthLg = (1200 - (COLS.lg + 1) * 10) / COLS.lg; // (containerWidth - (cols + 1) * margin) / cols
   const estimatedPixelWidth = DEFAULT_ITEM_WIDTH * approximateColWidthLg;
   const estimatedPixelHeight = estimatedPixelWidth / aspectRatio;
-  const h = Math.max(2, Math.ceil(estimatedPixelHeight / (DEFAULT_ROW_HEIGHT + 10 )));
+  
+  // Calculate height in terms of rowHeight units, including margin/padding considerations
+  const h = Math.max(2, Math.ceil(estimatedPixelHeight / (DEFAULT_ROW_HEIGHT + 10 /* row margin */)));
+
 
   let yPos = 0;
   if (existingLayout.length > 0) {
@@ -38,7 +43,7 @@ const generateLayoutItem = (
   }
  
   if (xPos + DEFAULT_ITEM_WIDTH > COLS.lg) {
-    yPos = yPos + h; 
+    yPos = yPos + Math.max(...itemsInCurrentPotentialRow.map(i => i.h), h); 
     xPos = 0;
   }
 
@@ -54,17 +59,17 @@ const generateLayoutItem = (
 };
 
 const defaultImagesSeed: Omit<UploadedImage, 'id' | 'type'>[] = [
-  { src: 'https://placehold.co/800x500.png', name: 'Mountain Vista', width: 800, height: 500, aiHint: 'mountain lake' },
-  { src: 'https://placehold.co/400x600.png', name: 'Forest Trail', width: 400, height: 600, aiHint: 'deep forest' },
-  { src: 'https://placehold.co/700x450.png', name: 'Sunset Beach', width: 700, height: 450, aiHint: 'tropical sunset' },
-  { src: 'https://placehold.co/600x700.png', name: 'Desert Mirage', width: 600, height: 700, aiHint: 'sand dunes' },
-  { src: 'https://placehold.co/500x800.png', name: 'City Skyline', width: 500, height: 800, aiHint: 'city night' },
+  { src: 'https://images.pexels.com/photos/1172675/pexels-photo-1172675.jpeg?auto=compress&cs=tinysrgb&w=1200', name: 'Lakeside Forest', width: 1200, height: 800, aiHint: 'lake forest' },
+  { src: 'https://images.pexels.com/photos/1662298/pexels-photo-1662298.jpeg?auto=compress&cs=tinysrgb&w=1200', name: 'Pine Tree Aerial', width: 1200, height: 674, aiHint: 'pine aerial' },
+  { src: 'https://images.pexels.com/photos/1450360/pexels-photo-1450360.jpeg?auto=compress&cs=tinysrgb&w=1200', name: 'Beach Overhead', width: 1200, height: 800, aiHint: 'beach aerial' },
+  { src: 'https://images.pexels.com/photos/1526713/pexels-photo-1526713.jpeg?auto=compress&cs=tinysrgb&w=1200', name: 'Coastal Trees', width: 1200, height: 800, aiHint: 'coast trees' },
+  { src: 'https://images.pexels.com/photos/1809644/pexels-photo-1809644.jpeg?auto=compress&cs=tinysrgb&w=1200', name: 'River Bend Forest', width: 1200, height: 800, aiHint: 'river forest' },
 ];
 
 const initialImages: UploadedImage[] = defaultImagesSeed.map((img, index) => ({
   ...img,
   id: `default-image-${index + 1}`,
-  type: 'image/png', 
+  type: 'image/jpeg', 
 }));
 
 let tempCurrentLayoutForInit: Layout[] = [];
@@ -99,7 +104,7 @@ export default function IGalleryPage() {
         const derivedInitialImages: UploadedImage[] = defaultImagesSeed.map((img, index) => ({
             ...img,
             id: `default-image-reinit-${index + 1}`, 
-            type: 'image/png',
+            type: 'image/jpeg',
         }));
         
         let tempLayout: Layout[] = [];
@@ -140,7 +145,6 @@ export default function IGalleryPage() {
 
     setLayouts(prevLayouts => {
       const newLayoutsState: Layouts = {};
-      // Ensure all existing breakpoint arrays are copied as new arrays
       (Object.keys(COLS) as Array<keyof typeof COLS>).forEach(bk => {
         newLayoutsState[bk] = prevLayouts[bk] ? [...prevLayouts[bk]!] : [];
       });
@@ -248,16 +252,20 @@ export default function IGalleryPage() {
     }
 
     let startIndex = currentPreviewIndex - halfPoint;
-    let endIndex = currentPreviewIndex + halfPoint + 1; 
+    let endIndex = currentPreviewIndex + halfPoint + (images.length % 2 === 0 ? 0 : 1); // Adjust for even/odd total
 
     if (startIndex < 0) {
+      endIndex -= startIndex; // Shift end index by the same amount
       startIndex = 0;
-      endIndex = totalThumbnails;
-    } else if (endIndex > images.length) {
+    }
+    if (endIndex > images.length) {
+      startIndex -= (endIndex - images.length); // Shift start index
       endIndex = images.length;
-      startIndex = images.length - totalThumbnails;
     }
     
+    // Ensure startIndex is not negative after adjustments
+    startIndex = Math.max(0, startIndex);
+
     return images.slice(startIndex, endIndex);
   };
 
@@ -317,7 +325,7 @@ export default function IGalleryPage() {
         <Dialog open={currentPreviewIndex !== null} onOpenChange={(isOpen) => !isOpen && handleClosePreview()}>
           <DialogContent className={cn(
             "p-0 m-0 w-screen h-screen max-w-none border-none rounded-none flex items-center justify-center outline-none ring-0 focus:ring-0",
-            "frosted-glass"
+            "frosted-glass" // Apply frosted glass to the entire dialog
             )}>
             <DialogTitle className="sr-only">{previewImage.name}</DialogTitle>
             <div className="relative flex flex-col items-center justify-center w-full h-full p-4">
