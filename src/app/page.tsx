@@ -13,55 +13,35 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 const DEFAULT_ITEM_WIDTH = 4; 
-const DEFAULT_ROW_HEIGHT = 30; 
+// const DEFAULT_ROW_HEIGHT = 30; // Referenced in generateLayoutItem for aspect ratio calc, but now random height
 const COLS = { lg: 32, md: 24, sm: 16, xs: 12, xxs: 10 };
-const MARGIN_BETWEEN_ITEMS = 10; // This matches RGL's default margin if not overridden
+// const MARGIN_BETWEEN_ITEMS = 10; // This matches RGL's default margin if not overridden
+
+// Constants for random sizing during shuffle and initial/new item generation
+const MIN_RANDOM_W = 4;
+const MAX_RANDOM_W_FACTOR = 0.375; // e.g., 37.5% of total columns for lg breakpoint
+const MIN_RANDOM_H = 2;
+const MAX_RANDOM_H = 8; // Max height in grid units (rowHeight is 30px per unit)
+
 
 const generateLayoutItem = (
   image: UploadedImage,
-  existingLayout: Layout[] = [],
-  itemWidth: number = DEFAULT_ITEM_WIDTH,
+  _existingLayout: Layout[] = [], // Not used for x,y calculation with y:Infinity approach
+  itemWidth: number = DEFAULT_ITEM_WIDTH, // itemWidth is not strictly used if we randomize 'w'
   colsForBreakpoint: number = COLS.lg
 ): Layout => {
-  const aspectRatio = image.width / image.height;
-  // Approximate calculation, assuming a common grid width for 'lg' or using passed cols
-  // This is a rough estimate for initial height calculation.
-  // A 1200px grid width, 32 cols, 10px margin: (1200 - (32+1)*10) / 32 ~= 27px per col unit width
-  const approximateColPixelWidth = (1200 - (colsForBreakpoint + 1) * MARGIN_BETWEEN_ITEMS) / colsForBreakpoint; 
-  
-  const estimatedPixelWidth = itemWidth * approximateColPixelWidth;
-  const estimatedPixelHeight = estimatedPixelWidth / aspectRatio;
-  
-  // Calculate height in grid units. Each grid unit height is rowHeight (30px) + margin (10px) = 40px total slot.
-  // So, h = estimatedPixelHeight / (rowHeight_prop_in_RGL)
-  // RGL rowHeight prop is 30. The margin is handled by RGL between items.
-  const h = Math.max(2, Math.ceil(estimatedPixelHeight / DEFAULT_ROW_HEIGHT));
-
-
-  let yPos = 0;
-  if (existingLayout.length > 0) {
-    yPos = Math.max(...existingLayout.map(item => item.y + item.h), 0);
-  }
-  
-  const itemsInCurrentPotentialRow = existingLayout.filter(item => item.y === yPos);
-  let xPos = 0;
-  if(itemsInCurrentPotentialRow.length > 0){
-    xPos = itemsInCurrentPotentialRow.reduce((sum, item) => sum + item.w, 0) % colsForBreakpoint;
-  }
- 
-  if (xPos + itemWidth > colsForBreakpoint) {
-    yPos = yPos + Math.max(...itemsInCurrentPotentialRow.map(i => i.h), h); 
-    xPos = 0; 
-  }
+  const maxW = Math.max(MIN_RANDOM_W, Math.floor(colsForBreakpoint * MAX_RANDOM_W_FACTOR));
+  const w = Math.floor(Math.random() * (maxW - MIN_RANDOM_W + 1)) + MIN_RANDOM_W;
+  const h = Math.floor(Math.random() * (MAX_RANDOM_H - MIN_RANDOM_H + 1)) + MIN_RANDOM_H;
 
   return {
     i: image.id,
-    x: xPos,
-    y: yPos,
-    w: itemWidth,
+    x: 0, // RGL places from left with y:Infinity
+    y: Infinity, // RGL compacts vertically and horizontally based on compactType
+    w: w,
     h: h,
-    minW: 4, 
-    minH: 2, 
+    minW: MIN_RANDOM_W, 
+    minH: MIN_RANDOM_H, 
   };
 };
 
@@ -89,10 +69,11 @@ const initialImages: UploadedImage[] = defaultImagesSeed.map((img, index) => ({
   type: 'image/jpeg', 
 }));
 
+
 let tempCurrentLayoutForInit: Layout[] = [];
 const initialLayoutsLg: Layout[] = initialImages.map(img => {
-  const layoutItem = generateLayoutItem(img, tempCurrentLayoutForInit);
-  tempCurrentLayoutForInit.push(layoutItem);
+  const layoutItem = generateLayoutItem(img, tempCurrentLayoutForInit, DEFAULT_ITEM_WIDTH, COLS.lg);
+  tempCurrentLayoutForInit.push(layoutItem); // This is okay for y:Infinity, RGL handles overlap
   return layoutItem;
 });
 
@@ -126,7 +107,7 @@ export default function IGalleryPage() {
         
         let tempLayout: Layout[] = [];
         const derivedInitialLayoutsLg: Layout[] = derivedInitialImages.map(img => {
-            const layoutItem = generateLayoutItem(img, tempLayout);
+            const layoutItem = generateLayoutItem(img, tempLayout, DEFAULT_ITEM_WIDTH, COLS.lg);
             tempLayout.push(layoutItem);
             return layoutItem;
         });
@@ -141,7 +122,8 @@ export default function IGalleryPage() {
     image: UploadedImage,
     existingLayout: Layout[] = [] 
   ): Layout => {
-    return generateLayoutItem(image, existingLayout);
+    // For new uploads, use the simpler y:Infinity method
+    return generateLayoutItem(image, existingLayout, DEFAULT_ITEM_WIDTH, COLS.lg);
   }, []); 
 
 
@@ -179,12 +161,10 @@ export default function IGalleryPage() {
   }, [calculateInitialLayoutItem]);
 
   const onLayoutChange = useCallback((currentLayout: Layout[], allLayouts: Layouts) => {
-    // Only update if the layout has actually changed to prevent infinite loops
-    // This basic check might need to be more sophisticated if issues persist
     if (JSON.stringify(allLayouts) !== JSON.stringify(layouts)) {
       setLayouts(allLayouts);
     }
-  }, [layouts]); // Add layouts to dependency array
+  }, [layouts]); 
 
   const handleImageRemove = useCallback((imageId: string) => {
     setImages(prevImages => prevImages.filter(img => img.id !== imageId));
@@ -196,42 +176,100 @@ export default function IGalleryPage() {
         );
       });
       if (images.filter(img => img.id !== imageId).length === 0) {
-        // If all images are removed, reset all breakpoint layouts to empty arrays
         return { lg: [], md: [], sm: [], xs: [], xxs: [] };
       }
       return newLayoutsState;
     });
-  }, [images, setImages, setLayouts]); // Added images, setImages, setLayouts to dependency array
+  }, [images, setImages, setLayouts]);
 
   const handleShuffle = useCallback(() => {
     if (images.length === 0) return;
 
-    const shuffledImagesOrder = [...images].sort(() => Math.random() - 0.5);
-    const numCols = COLS.lg; // Use lg breakpoint for generating base random layout
+    // 1. Update image indexes (shuffle the images array in state)
+    const shuffledImages = [...images].sort(() => Math.random() - 0.5);
+    setImages(shuffledImages); 
 
-    const minGridW = 4; 
-    const maxGridW = Math.max(minGridW, Math.floor(numCols * 0.375)); // Max width e.g., 12 cols for 32 total
+    const newLgLayout: Layout[] = [];
+    const numCols = COLS.lg;
+    const maxW = Math.max(MIN_RANDOM_W, Math.floor(numCols * MAX_RANDOM_W_FACTOR));
 
-    const minGridH = 4; // Min height in grid units (rowHeight is 30px per unit)
-    const maxGridH = 10; // Max height in grid units
+    // columnHeights[x] stores the y-coordinate of the bottom edge of the last item in column x
+    const columnHeights = Array(numCols).fill(0);
 
-    const newLgLayout: Layout[] = shuffledImagesOrder.map((image) => {
-      const newW = Math.floor(Math.random() * (maxGridW - minGridW + 1)) + minGridW;
-      const newH = Math.floor(Math.random() * (maxGridH - minGridH + 1)) + minGridH;
+    // Use the shuffledImages from the local variable, as state update might be async
+    for (const image of shuffledImages) {
+      const itemW = Math.floor(Math.random() * (maxW - MIN_RANDOM_W + 1)) + MIN_RANDOM_W;
+      const itemH = Math.floor(Math.random() * (MAX_RANDOM_H - MIN_RANDOM_H + 1)) + MIN_RANDOM_H;
 
-      return {
-        i: image.id,
-        w: newW,
-        h: newH,
-        x: 0, // Let RGL place items from left
-        y: Infinity, // Let RGL compact vertically
-        minW: 4, // Minimum width constraint for resizing
-        minH: 2, // Minimum height constraint for resizing
-      };
-    });
+      let bestX = -1;
+      let bestY = Infinity;
 
-    setLayouts({ lg: newLgLayout }); // Update only 'lg', RGL will derive others
-  }, [images]); // Dependency: images array for shuffling
+      // Find the best spot (lowest y, then leftmost x)
+      for (let x_coord = 0; x_coord <= numCols - itemW; x_coord++) {
+        let currentMaxYInWindow = 0;
+        for (let i = 0; i < itemW; i++) {
+          currentMaxYInWindow = Math.max(currentMaxYInWindow, columnHeights[x_coord + i]);
+        }
+
+        if (currentMaxYInWindow < bestY) {
+          bestY = currentMaxYInWindow;
+          bestX = x_coord;
+        }
+      }
+
+      if (bestX !== -1) { 
+        newLgLayout.push({
+          i: image.id,
+          x: bestX,
+          y: bestY,
+          w: itemW,
+          h: itemH,
+          minW: MIN_RANDOM_W, 
+          minH: MIN_RANDOM_H,
+        });
+        // Update column heights for the occupied space
+        for (let i = 0; i < itemW; i++) {
+          columnHeights[bestX + i] = bestY + itemH;
+        }
+      } else {
+        // Fallback: this should ideally not be reached if numCols is large enough
+        // and itemW is reasonable. If it is, place item at the bottom of the tallest column.
+        const fallbackY = Math.max(0, ...columnHeights); // Ensure fallbackY is at least 0
+        let targetX = 0; // Default to column 0
+        // Try to find a column that can fit itemW, starting from left
+        for (let fx = 0; fx <= numCols - itemW; fx++) {
+            let canFit = true;
+            for (let colIdx = 0; colIdx < itemW; colIdx++) {
+                if (columnHeights[fx + colIdx] > fallbackY) { // Check if this window starts below the current item
+                    canFit = false;
+                    break;
+                }
+            }
+            if (canFit) {
+                targetX = fx;
+                break;
+            }
+        }
+        
+        console.warn(`Using fallback placement for image ${image.id} during shuffle.`);
+        newLgLayout.push({
+          i: image.id,
+          x: targetX, 
+          y: fallbackY, 
+          w: itemW,
+          h: itemH,
+          minW: MIN_RANDOM_W,
+          minH: MIN_RANDOM_H,
+        });
+        for (let i = 0; i < itemW; i++) {
+            if (targetX + i < numCols) {
+                 columnHeights[targetX + i] = fallbackY + itemH;
+            }
+        }
+      }
+    }
+    setLayouts({ lg: newLgLayout });
+  }, [images]);
 
 
   const handleOpenPreview = useCallback((imageId: string) => {
@@ -302,9 +340,7 @@ export default function IGalleryPage() {
       endIndex = images.length;
     }
     
-    // Ensure startIndex is not negative if images.length is small
     startIndex = Math.max(0, startIndex);
-    // Ensure endIndex does not exceed images.length
     endIndex = Math.min(images.length, endIndex);
 
 
@@ -382,6 +418,7 @@ export default function IGalleryPage() {
                 </Button>
               </DialogClose>
 
+              {/* Image Viewer Container - now with overflow-y-auto */}
               <div className="relative flex items-center justify-center w-full flex-grow mb-4 overflow-y-auto">
                 {images.length > 1 && (
                   <Button
@@ -395,9 +432,9 @@ export default function IGalleryPage() {
                   </Button>
                 )}
                 
-                {/* Outer Sizing Wrapper */}
+                {/* Outer Sizing Wrapper - 75% width, max-height constrained */}
                 <div className="relative w-3/4 max-h-[calc(100vh_-_12rem)]">
-                  {/* Inner Styled Wrapper */}
+                  {/* Inner Styled Wrapper - full width/height of outer, with padding and blur */}
                   <div className={cn(
                     "relative w-full h-auto p-2 rounded-xl overflow-hidden",
                     "bg-black/20 dark:bg-white/10 backdrop-blur-md", 
@@ -418,7 +455,6 @@ export default function IGalleryPage() {
                   </div>
                 </div>
                 
-
                 {images.length > 1 && (
                   <Button
                     variant="ghost"
