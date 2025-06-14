@@ -301,8 +301,6 @@ export default function IGalleryPage() {
               onLayoutChange={onLayoutChange} 
               onImageRemove={handleImageRemove}
               onImagePreview={handleOpenPreview}
-              rowHeight={DEFAULT_ROW_HEIGHT}
-              cols={COLS}
             />
           )}
         </section>
@@ -340,9 +338,10 @@ export default function IGalleryPage() {
                   </Button>
                 )}
 
-                <div /* This is the Frame for the image */
+                <div 
                   className={cn(
-                    "relative max-w-full max-h-[calc(100vh_-_12rem)]", // Constrains the frame
+                    "relative w-full h-full", // Added w-full h-full
+                    "max-w-full max-h-[calc(100vh_-_12rem)]", 
                     "bg-black/5 dark:bg-white/5 backdrop-blur-sm rounded-xl shadow-2xl p-3",
                     "border border-white/10 dark:border-black/10"
                   )}
@@ -351,9 +350,9 @@ export default function IGalleryPage() {
                     key={previewImage.id}
                     src={previewImage.src}
                     alt={previewImage.name}
-                    fill // Image fills the parent frame (respecting padding)
-                    className="object-contain rounded-lg" // Maintains aspect ratio within its allocated space
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 60vw" // Adjusted sizes
+                    fill 
+                    className="object-contain rounded-lg" 
+                    sizes="(max-width: 768px) 90vw, (max-width: 1200px) 80vw, 70vw" 
                     data-ai-hint={previewImage.aiHint}
                     unoptimized 
                     priority={currentPreviewIndex === images.findIndex(img => img.id === previewImage.id)}
