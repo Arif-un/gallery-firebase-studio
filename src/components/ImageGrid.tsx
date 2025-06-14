@@ -55,7 +55,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
           alt: image.name,
           fill: true,
           sizes: "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
-          className: "rounded-lg transition-all duration-300 group-hover:scale-105 object-cover group-hover:blur-sm",
+          className: "rounded-lg transition-all duration-300 group-hover:scale-105 group-hover:blur-sm object-cover",
           unoptimized: true,
         };
 
@@ -67,7 +67,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
           <div key={item.i} data-grid={item} className="group relative overflow-hidden rounded-lg shadow-md bg-card">
             <Card className="w-full h-full flex flex-col overflow-hidden border-0 shadow-none">
               <div
-                className="draggable-handle absolute top-2 left-1/2 transform -translate-x-1/2 z-20 p-1.5 backdrop-blur-lg border border-white/20 cursor-grab bg-black/30 hover:bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                className="draggable-handle absolute top-2 left-1/2 transform -translate-x-1/2 z-20 p-1.5 backdrop-blur-lg border-2 border-white/20 cursor-grab bg-black/30 hover:bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               >
                 <Move className="size-4 text-white/80" />
               </div>
@@ -98,7 +98,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
               <Eye className="h-6 w-6" />
             </Button>
 
-            <div className="absolute bottom-0 left-0 right-0 p-2 bg-black/20 backdrop-blur-lg border border-white/20 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex justify-between items-center z-10 m-2">
+            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 p-2 bg-black/20 backdrop-blur-lg border border-white/20 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 z-10">
               <span className="text-white text-xs sm:text-sm font-semibold truncate pr-1">{image.name}</span>
               <div className="flex gap-1 sm:gap-2">
                 <Button
@@ -119,3 +119,6 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
 };
 
 export default ImageGrid;
+
+
+    
