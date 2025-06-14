@@ -56,7 +56,7 @@ const generateLayoutItem = (
     y: yPos,
     w: DEFAULT_ITEM_WIDTH,
     h: h,
-    minW: 2, // Minimum width of 2 columns
+    minW: 4, // Minimum width of 4 columns
     minH: 2, // Minimum height of 2 rows
   };
 };
@@ -196,7 +196,7 @@ export default function IGalleryPage() {
       }
       return newLayoutsState;
     });
-  }, [images]); 
+  }, [images, setImages, setLayouts]); 
 
   const handleRemoveAllImages = () => {
     setImages([]);
@@ -332,7 +332,7 @@ export default function IGalleryPage() {
            <DialogTitle className="sr-only">{previewImage.name}</DialogTitle>
           <DialogContent className={cn(
             "p-0 m-0 w-screen h-screen max-w-none border-none rounded-none flex items-center justify-center outline-none ring-0 focus:ring-0",
-            "frosted-glass" 
+            "frosted-glass shadow-2xl" 
             )}>
             <div className="relative flex flex-col items-center justify-center w-full h-full p-4">
               <DialogClose asChild>
