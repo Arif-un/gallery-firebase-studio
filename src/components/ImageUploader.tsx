@@ -64,13 +64,13 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onUploadComplete }) => {
 
       if (successful.length === 0 && failed.length > 0) {
         // If only failures, reset immediately
-        uppy.reset();
+        uppy.cancelAll();
         return;
       }
       
       if (successful.length === 0) {
         // No successful files to process, reset if not already handled by failure case
-        uppy.reset();
+        uppy.cancelAll();
         return;
       }
 
@@ -121,7 +121,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onUploadComplete }) => {
         });
       }).finally(() => {
         // Always reset Uppy after attempting to process files
-        uppy.reset(); 
+        uppy.cancelAll()
       });
     };
 
