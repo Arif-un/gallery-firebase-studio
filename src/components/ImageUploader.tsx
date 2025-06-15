@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useEffect, useMemo } from 'react';
@@ -14,6 +13,7 @@ import Instagram from '@uppy/instagram';
 
 import type { UploadedImage } from '@/types';
 import { useToast } from '@/hooks/use-toast';
+import { useTheme } from '@/contexts/ThemeContext';
 
 // Import Uppy CSS
 import '@uppy/core/dist/style.min.css';
@@ -28,6 +28,7 @@ interface ImageUploaderProps {
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({ onUploadComplete }) => {
   const { toast } = useToast();
+  const { theme } = useTheme();
 
   const uppy = useMemo(() => {
     const uppyInstance = new Uppy({
@@ -49,7 +50,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onUploadComplete }) => {
       .use(Instagram, { companionUrl: 'https://companion.uppy.io' });
       
     return uppyInstance;
-  }, []);
+  }, [theme]);
 
   useEffect(() => {
     const handleComplete = (result: { successful: any[]; failed: any[] }) => {
@@ -140,17 +141,16 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onUploadComplete }) => {
       proudlyDisplayPoweredByUppy={false}
       width="100%"
       height={300}
-      theme="light" 
+      theme={theme}
       note="Images only, up to 10MB each, max 10 files."
       showProgressDetails={true}
-      browserBackButtonClose={true}
       locale={{
         strings: {
-          dropPasteImport: 'Drag & drop images here, paste, or %{browse}',
-          browse: 'browse your computer',
+          dropPasteImportBoth: 'Drag & drop images here, paste, or %{browseFiles}',
+          browseFiles: 'browse your computer',
         },
       }}
-      className="[&_.uppy-Dashboard-inner]:rounded-lg [&_.uppy-Dashboard-AddFiles]:border-2 [&_.uppy-Dashboard-AddFiles]:border-dashed [&_.uppy-Dashboard-AddFiles]:border-primary/50 [&_.uppy-Dashboard-AddFiles]:bg-primary/5"
+      className="[&_.uppy-Dashboard-inner]:rounded-lg [&_.uppy-Dashboard-AddFiles]:border-2 [&_.uppy-Dashboard-AddFiles]:border-dashed [&_.uppy-Dashboard-AddFiles]:border-primary/50 [&_.uppy-Dashboard-AddFiles]:bg-primary/5 [&_.uppy-Dashboard-inner]:dark:bg-gray-800 [&_.uppy-Dashboard-inner]:dark:border-gray-700 [&_.uppy-Dashboard-AddFiles]:dark:bg-gray-900/50 [&_.uppy-Dashboard-AddFiles]:dark:border-gray-600 [&_.uppy-Dashboard-browse]:dark:text-blue-400 [&_.uppy-Dashboard-dropFilesHereHint]:dark:text-gray-300 [&_.uppy-Dashboard-Item-name]:dark:text-gray-300 [&_.uppy-Dashboard-Item-statusSize]:dark:text-gray-400 [&_.uppy-Dashboard-Item]:dark:bg-gray-900/50 [&_.uppy-Dashboard-Item]:dark:border-gray-700 [&_.uppy-Dashboard-Item-preview]:dark:bg-gray-800 [&_.uppy-Dashboard-Item-previewInnerWrap]:dark:border-gray-700 [&_.uppy-Dashboard-FileInput]:dark:text-gray-300"
     />
   );
 };

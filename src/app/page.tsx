@@ -10,6 +10,7 @@ import { Sun, Moon, ChevronLeft, ChevronRight, X, Shuffle as ShuffleIcon } from 
 import { Dialog, DialogContent, DialogClose, DialogTitle } from '@/components/ui/dialog';
 import Image from 'next/image';
 import { cn, generateBentoGrid, validateAndFillGrid } from '@/lib/utils';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const DEFAULT_ITEM_WIDTH = 4; 
 const COLS = { lg: 32, md: 24, sm: 16, xs: 12, xxs: 10 };
@@ -239,41 +240,31 @@ export default function GalleryPage() {
   const [images, setImages] = useState<UploadedImage[]>(initialImages);
   const [layouts, setLayouts] = useState<Layouts>({ lg: initialLayoutsLg });
   const [mounted, setMounted] = useState(false);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const defaultsInitializedRef = useRef(false);
   const [currentPreviewIndex, setCurrentPreviewIndex] = useState<number | null>(null);
-
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     setMounted(true);
-    const storedTheme = localStorage.getItem('Gallery-theme') as 'light' | 'dark' | null;
-    if (storedTheme) {
-      setTheme(storedTheme);
-      document.documentElement.classList.toggle('dark', storedTheme === 'dark');
-    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setTheme('dark');
-      document.documentElement.classList.add('dark');
-    }
-
+    
     if (images.length === 0 && (!layouts.lg || layouts.lg.length === 0) && !defaultsInitializedRef.current) {
-        const derivedInitialImages: UploadedImage[] = defaultImagesSeed.map((img, index) => ({
-            ...img,
-            id: `default-image-reinit-${index + 1}`, 
-            type: 'image/jpeg',
-        }));
-        
-        let tempLayout: Layout[] = [];
-        const derivedInitialLayoutsLg: Layout[] = derivedInitialImages.map(img => {
-            const layoutItem = generateLayoutItem(img, tempLayout, DEFAULT_ITEM_WIDTH, COLS.lg);
-            tempLayout.push(layoutItem);
-            return layoutItem;
-        });
-        setImages(derivedInitialImages);
-        setLayouts({ lg: derivedInitialLayoutsLg });
-        defaultsInitializedRef.current = true; 
+      const derivedInitialImages: UploadedImage[] = defaultImagesSeed.map((img, index) => ({
+        ...img,
+        id: `default-image-reinit-${index + 1}`, 
+        type: 'image/jpeg',
+      }));
+      
+      let tempLayout: Layout[] = [];
+      const derivedInitialLayoutsLg: Layout[] = derivedInitialImages.map(img => {
+        const layoutItem = generateLayoutItem(img, tempLayout, DEFAULT_ITEM_WIDTH, COLS.lg);
+        tempLayout.push(layoutItem);
+        return layoutItem;
+      });
+      setImages(derivedInitialImages);
+      setLayouts({ lg: derivedInitialLayoutsLg });
+      defaultsInitializedRef.current = true; 
     }
   }, []); 
-
 
   const calculateInitialLayoutItem = useCallback((
     image: UploadedImage,
@@ -281,14 +272,6 @@ export default function GalleryPage() {
   ): Layout => {
     return generateLayoutItem(image, existingLayout, DEFAULT_ITEM_WIDTH, COLS.lg);
   }, []); 
-
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    localStorage.setItem('Gallery-theme', newTheme);
-    document.documentElement.classList.toggle('dark', newTheme === 'dark');
-  };
 
   const handleUploads = useCallback((newImages: UploadedImage[]) => {
     setImages(prevImages => {

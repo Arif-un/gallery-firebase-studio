@@ -8,29 +8,47 @@ body {
 
 @layer base {
   * {
-    @apply border-gray-200;
+    @apply border-gray-200 dark:border-gray-700;
   }
   body {
-    @apply bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100;
+    @apply bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-50 transition-colors duration-300;
     font-family: var(--font-body);
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-headline);
+    @apply dark:text-gray-100;
   }
 }
 
 @layer components {
   .frosted-glass {
-    @apply bg-gray-100/65 dark:bg-gray-900/75 backdrop-blur-xl saturate-150 border border-white/20 dark:border-white/10;
+    @apply bg-white/75 dark:bg-gray-900/85 backdrop-blur-xl saturate-150 
+           border border-white/20 dark:border-white/10 
+           shadow-lg dark:shadow-2xl
+           transition-all duration-300;
+  }
+  
+  .image-card {
+    @apply bg-white dark:bg-gray-800 
+           shadow-md dark:shadow-lg 
+           rounded-lg overflow-hidden 
+           transition-all duration-300;
+  }
+  
+  .interactive-element {
+    @apply hover:bg-gray-100 dark:hover:bg-gray-800
+           active:bg-gray-200 dark:active:bg-gray-700
+           focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
+           transition-all duration-200;
   }
 }
 
 /* Uppy custom styling */
 .uppy-Dashboard-AddFiles {
-  @apply rounded-lg;
+  @apply rounded-lg dark:bg-gray-800 dark:text-gray-100;
 }
 .uppy-Dashboard-Item-action--remove {
-  @apply text-red-600 hover:text-red-500;
+  @apply text-red-600 hover:text-red-500 dark:text-red-400 dark:hover:text-red-300;
 }
 
 /* React Grid Layout custom styling */
@@ -47,10 +65,12 @@ body {
   @apply opacity-90 z-10;
 }
 .react-grid-item.react-draggable-dragging {
-  @apply transition-none opacity-80 z-20 shadow-2xl;
+  @apply transition-none opacity-80 z-20 shadow-2xl dark:shadow-gray-900/50;
 }
 .react-grid-item.react-grid-placeholder {
-  @apply bg-gray-200/50 dark:bg-gray-700/50 rounded-md opacity-50 transition-all duration-200 ease-in-out border-2 border-dashed border-gray-300 dark:border-gray-600;
+  @apply bg-gray-200/50 dark:bg-gray-700/50 rounded-md opacity-50 
+         transition-all duration-200 ease-in-out 
+         border-2 border-dashed border-gray-300 dark:border-gray-600;
 }
 
 /* --- RESIZE HANDLE STYLING REWORK --- */
@@ -79,7 +99,11 @@ body {
   height: 2.25rem !important;
   right: 0.5rem !important;
   bottom: 0.5rem !important;
-  @apply group-hover:block group-hover:opacity-100 cursor-se-resize border-2 border-white/5 bg-black/20 backdrop-blur rounded-full flex items-center justify-center;
+  @apply group-hover:block group-hover:opacity-100 cursor-se-resize 
+         border-2 border-white/5 
+         bg-black/20 dark:bg-white/10 
+         backdrop-blur rounded-full 
+         flex items-center justify-center;
 }
 
 .react-resizable-handle-se::after {
@@ -114,6 +138,45 @@ body {
 .react-resizable-handle-nw::after,
 .react-resizable-handle-sw::after {
   display: none !important;
+}
+
+/* Animations */
+@keyframes fadeInDown {
+  from { 
+    opacity: 0; 
+    transform: translateY(-20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes fadeInUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+.animate-fade-in-down {
+  animation: fadeInDown 0.5s ease-out forwards;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.animation-delay-200 { 
+  animation-delay: 0.2s; 
+}
+
+.animation-delay-400 { 
+  animation-delay: 0.4s; 
 }
     
 
