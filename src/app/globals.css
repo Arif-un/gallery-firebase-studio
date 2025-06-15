@@ -154,6 +154,7 @@ body {
    They should not take up space or be visible unless specifically styled.
 */
 .react-resizable-handle {
+  z-index: 99999;
   background-image: none !important;
   width: 0 !important; /* Does not take space */
   height: 0 !important; /* Does not take space */

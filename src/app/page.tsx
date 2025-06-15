@@ -236,7 +236,7 @@ const initialLayoutsLg: Layout[] =[
 ]
 
 
-export default function IGalleryPage() {
+export default function GalleryPage() {
   const [images, setImages] = useState<UploadedImage[]>(initialImages);
   const [layouts, setLayouts] = useState<Layouts>({ lg: initialLayoutsLg });
   const [mounted, setMounted] = useState(false);
@@ -247,7 +247,7 @@ export default function IGalleryPage() {
 
   useEffect(() => {
     setMounted(true);
-    const storedTheme = localStorage.getItem('igallery-theme') as 'light' | 'dark' | null;
+    const storedTheme = localStorage.getItem('Gallery-theme') as 'light' | 'dark' | null;
     if (storedTheme) {
       setTheme(storedTheme);
       document.documentElement.classList.toggle('dark', storedTheme === 'dark');
@@ -287,7 +287,7 @@ export default function IGalleryPage() {
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
-    localStorage.setItem('igallery-theme', newTheme);
+    localStorage.setItem('Gallery-theme', newTheme);
     document.documentElement.classList.toggle('dark', newTheme === 'dark');
   };
 
@@ -433,14 +433,14 @@ export default function IGalleryPage() {
   const previewImage = currentPreviewIndex !== null ? images[currentPreviewIndex] : null;
 
   if (!mounted) {
-    return <div className="min-h-screen bg-background flex items-center justify-center"><p>Loading iGallery...</p></div>;
+    return <div className="min-h-screen bg-background flex items-center justify-center"><p>Loading Gallery...</p></div>;
   }
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col items-center p-4 md:p-8 transition-colors duration-300">
       <header className="w-full max-w-6xl mb-8 flex justify-between items-center">
         <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary animate-fade-in-down">
-          iGallery
+          Gallery
         </h1>
         <Button onClick={toggleTheme} variant="ghost" size="icon" aria-label="Toggle theme">
           {theme === 'light' ? <Moon className="h-6 w-6" /> : <Sun className="h-6 w-6" />}
@@ -448,17 +448,17 @@ export default function IGalleryPage() {
       </header>
 
       <main className="w-full max-w-6xl flex flex-col gap-8">
-        <section aria-labelledby="upload-heading" className="frosted-glass rounded-xl shadow-xl p-4 sm:p-6 animate-fade-in-up">
+        <section aria-labelledby="upload-heading" className="frosted-glass rounded-xl p-4 sm:p-6 animate-fade-in-up">
           <h2 id="upload-heading" className="text-2xl font-semibold mb-4 text-primary">
             Upload Your Masterpieces
           </h2>
           <ImageUploader onUploadComplete={handleUploads} />
         </section>
 
-        <section aria-labelledby="gallery-heading" className="frosted-glass rounded-xl shadow-xl p-4 sm:p-6 min-h-[400px] animate-fade-in-up animation-delay-200">
+        <section aria-labelledby="gallery-heading" className="frosted-glass rounded-xl p-4 sm:p-6 min-h-[400px] animate-fade-in-up animation-delay-200">
           <div className="flex justify-between items-center mb-4">
             <h2 id="gallery-heading" className="text-2xl font-semibold text-primary">
-              Your Collection
+              Gallery
             </h2>
             {images.length > 0 && (
               <Button variant="outline" onClick={handleShuffle} size="sm">
@@ -583,7 +583,7 @@ export default function IGalleryPage() {
       )}
 
       <footer className="w-full max-w-6xl mt-12 text-center text-sm text-muted-foreground animate-fade-in-up animation-delay-400">
-        <p>&copy; {new Date().getFullYear()} iGallery. Inspired by Apple. Crafted with Next.js & Tailwind CSS.</p>
+        <p>&copy; {new Date().getFullYear()} Gallery. Inspired by Apple. Crafted with Next.js & Tailwind CSS.</p>
       </footer>
       <style jsx global>{`
         .animate-fade-in-down {

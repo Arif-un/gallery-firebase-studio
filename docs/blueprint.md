@@ -1,4 +1,4 @@
-# **App Name**: iGallery
+# **App Name**: Gallery
 
 ## Core Features:
 

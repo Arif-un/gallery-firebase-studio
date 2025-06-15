@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'iGallery',
+  title: 'Gallery',
   description: 'An image gallery inspired by Apple and iOS UI.',
 };
 

@@ -91,18 +91,9 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
             </Button>
 
             <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 z-10">
-              <div className="p-2 bg-black/20 backdrop-blur-lg border-2 border-white/5 rounded-md">
+              <div className="px-3 py-1 rounded-full bg-black/20 backdrop-blur-lg border-2 border-white/5">
                 <span className="text-white text-xs sm:text-sm font-semibold truncate">{image.name}</span>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-white/90 rounded-full p-1.5 h-7 w-7 flex items-center justify-center bg-black/20 hover:bg-black/30 backdrop-blur-lg border-2 border-white/5"
-                aria-label={`Share ${image.name}`}
-                onClick={(e) => e.stopPropagation()} 
-              >
-                <Share className='h-4 w-4' />
-              </Button>
             </div>
           </div>
         );

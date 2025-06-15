@@ -32,6 +32,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onUploadComplete }) => {
   const uppy = useMemo(() => {
     const uppyInstance = new Uppy({
       debug: process.env.NODE_ENV === 'development',
+      
       autoProceed: false, // Wait for user to click upload
       restrictions: {
         maxFileSize: 10 * 1024 * 1024, // 10MB
@@ -138,7 +139,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onUploadComplete }) => {
       plugins={['DragDrop', 'FileInput', 'Url', 'Webcam', 'GoogleDrive', 'Dropbox', 'Instagram']}
       proudlyDisplayPoweredByUppy={false}
       width="100%"
-      height={400}
+      height={300}
       theme="light" 
       note="Images only, up to 10MB each, max 10 files."
       showProgressDetails={true}
