@@ -69,167 +69,167 @@ const initialImages: UploadedImage[] = defaultImagesSeed.map((img, index) => ({
 let tempCurrentLayoutForInit: Layout[] = [];
 const initialLayoutsLg: Layout[] =[
   {
-      "w": 5,
+      "w": 10,
       "h": 7,
       "x": 0,
-      "y": 13,
-      "i": "default-image-1",
-      "minW": 4,
-      "minH": 2,
-      "moved": false,
-      "static": false
-  },
-  {
-      "w": 8,
-      "h": 6,
-      "x": 22,
-      "y": 10,
-      "i": "default-image-2",
-      "minW": 4,
-      "minH": 2,
-      "moved": false,
-      "static": false
-  },
-  {
-      "w": 4,
-      "h": 5,
-      "x": 26,
-      "y": 3,
-      "i": "default-image-3",
-      "minW": 4,
-      "minH": 2,
-      "moved": false,
-      "static": false
-  },
-  {
-      "w": 7,
-      "h": 3,
-      "x": 25,
       "y": 0,
-      "i": "default-image-4",
-      "minW": 4,
-      "minH": 2,
+      "i": "default-image-1",
+      "minW": 10,
+      "minH": 4,
       "moved": false,
       "static": false
   },
   {
       "w": 10,
-      "h": 6,
+      "h": 5,
       "x": 10,
       "y": 0,
+      "i": "default-image-2",
+      "minW": 10,
+      "minH": 4,
+      "moved": false,
+      "static": false
+  },
+  {
+      "w": 12,
+      "h": 7,
+      "x": 20,
+      "y": 0,
+      "i": "default-image-3",
+      "minW": 10,
+      "minH": 4,
+      "moved": false,
+      "static": false
+  },
+  {
+      "w": 10,
+      "h": 5,
+      "x": 10,
+      "y": 5,
+      "i": "default-image-4",
+      "minW": 10,
+      "minH": 4,
+      "moved": false,
+      "static": false
+  },
+  {
+      "w": 10,
+      "h": 7,
+      "x": 0,
+      "y": 7,
       "i": "default-image-5",
-      "minW": 4,
-      "minH": 2,
+      "minW": 10,
+      "minH": 4,
       "moved": false,
       "static": false
   },
   {
-      "w": 5,
-      "h": 3,
+      "w": 12,
+      "h": 7,
       "x": 20,
-      "y": 0,
+      "y": 7,
       "i": "default-image-6",
-      "minW": 4,
-      "minH": 2,
-      "moved": false,
-      "static": false
-  },
-  {
-      "w": 7,
-      "h": 8,
-      "x": 17,
-      "y": 16,
-      "i": "default-image-7",
-      "minW": 4,
-      "minH": 2,
-      "moved": false,
-      "static": false
-  },
-  {
-      "w": 6,
-      "h": 5,
-      "x": 20,
-      "y": 3,
-      "i": "default-image-8",
-      "minW": 4,
-      "minH": 2,
-      "moved": false,
-      "static": false
-  },
-  {
-      "w": 7,
-      "h": 2,
-      "x": 22,
-      "y": 8,
-      "i": "default-image-9",
-      "minW": 4,
-      "minH": 2,
+      "minW": 10,
+      "minH": 4,
       "moved": false,
       "static": false
   },
   {
       "w": 10,
-      "h": 7,
-      "x": 12,
-      "y": 8,
-      "i": "default-image-10",
-      "minW": 4,
-      "minH": 2,
-      "moved": false,
-      "static": false
-  },
-  {
-      "w": 12,
-      "h": 7,
-      "x": 0,
-      "y": 6,
-      "i": "default-image-11",
-      "minW": 4,
-      "minH": 2,
-      "moved": false,
-      "static": false
-  },
-  {
-      "w": 10,
-      "h": 6,
-      "x": 0,
-      "y": 0,
-      "i": "default-image-12",
-      "minW": 4,
-      "minH": 2,
-      "moved": false,
-      "static": false
-  },
-  {
-      "w": 12,
       "h": 4,
-      "x": 5,
-      "y": 15,
-      "i": "default-image-13",
-      "minW": 4,
-      "minH": 2,
+      "x": 10,
+      "y": 10,
+      "i": "default-image-7",
+      "minW": 10,
+      "minH": 4,
+      "moved": false,
+      "static": false
+  },
+  {
+      "w": 11,
+      "h": 11,
+      "x": 0,
+      "y": 14,
+      "i": "default-image-8",
+      "minW": 10,
+      "minH": 4,
+      "moved": false,
+      "static": false
+  },
+  {
+      "w": 21,
+      "h": 6,
+      "x": 11,
+      "y": 14,
+      "i": "default-image-9",
+      "minW": 10,
+      "minH": 4,
       "moved": false,
       "static": false
   },
   {
       "w": 10,
       "h": 5,
-      "x": 5,
-      "y": 19,
-      "i": "default-image-14",
-      "minW": 4,
-      "minH": 2,
+      "x": 11,
+      "y": 20,
+      "i": "default-image-10",
+      "minW": 10,
+      "minH": 4,
       "moved": false,
       "static": false
   },
   {
-      "w": 6,
+      "w": 12,
       "h": 5,
-      "x": 24,
-      "y": 16,
+      "x": 0,
+      "y": 25,
+      "i": "default-image-11",
+      "minW": 10,
+      "minH": 4,
+      "moved": false,
+      "static": false
+  },
+  {
+      "w": 11,
+      "h": 5,
+      "x": 21,
+      "y": 20,
+      "i": "default-image-12",
+      "minW": 10,
+      "minH": 4,
+      "moved": false,
+      "static": false
+  },
+  {
+      "w": 20,
+      "h": 8,
+      "x": 12,
+      "y": 25,
+      "i": "default-image-13",
+      "minW": 10,
+      "minH": 4,
+      "moved": false,
+      "static": false
+  },
+  {
+      "w": 12,
+      "h": 11,
+      "x": 0,
+      "y": 30,
+      "i": "default-image-14",
+      "minW": 10,
+      "minH": 4,
+      "moved": false,
+      "static": false
+  },
+  {
+      "w": 20,
+      "h": 8,
+      "x": 12,
+      "y": 33,
       "i": "default-image-15",
-      "minW": 4,
-      "minH": 2,
+      "minW": 10,
+      "minH": 4,
       "moved": false,
       "static": false
   }
@@ -449,7 +449,7 @@ export default function GalleryPage() {
 
       <main className="w-full max-w-6xl flex flex-col gap-8">
         <section aria-labelledby="upload-heading" className="frosted-glass rounded-xl p-4 sm:p-6 animate-fade-in-up">
-          <h2 id="upload-heading" className="text-2xl font-semibold mb-4 text-primary">
+          <h2 id="upload-heading" className="text-2xl font-semibold mb-4 text-slate-500">
             Upload Your Masterpieces
           </h2>
           <ImageUploader onUploadComplete={handleUploads} />
@@ -583,7 +583,7 @@ export default function GalleryPage() {
       )}
 
       <footer className="w-full max-w-6xl mt-12 text-center text-sm text-muted-foreground animate-fade-in-up animation-delay-400">
-        <p>&copy; {new Date().getFullYear()} Gallery. Inspired by Apple. Crafted with Next.js & Tailwind CSS.</p>
+        <p>&copy; {new Date().getFullYear()} Gallery.</p>
       </footer>
       <style jsx global>{`
         .animate-fade-in-down {
