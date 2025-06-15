@@ -12,10 +12,10 @@ const AnimatedBackground: React.FC = () => {
           position: absolute;
           inset: 0;
           background: 
-            radial-gradient(at 0% 0%, rgba(88, 28, 135, 0.15) 0, transparent 50%),
-            radial-gradient(at 98% 1%, rgba(49, 46, 129, 0.15) 0, transparent 50%),
-            radial-gradient(at 100% 100%, rgba(79, 70, 229, 0.15) 0, transparent 50%),
-            radial-gradient(at 0% 100%, rgba(124, 58, 237, 0.15) 0, transparent 50%);
+            radial-gradient(at 0% 0%, rgba(88, 28, 135, 0.35) 0, transparent 50%),
+            radial-gradient(at 98% 1%, rgba(49, 46, 129, 0.25) 0, transparent 50%),
+            radial-gradient(at 100% 100%, rgba(79, 70, 229, 0.45) 0, transparent 50%),
+            radial-gradient(at 0% 100%, rgba(124, 58, 237, 0.35) 0, transparent 50%);
           animation: gradient 15s ease infinite;
           background-size: 200% 200%;
         }

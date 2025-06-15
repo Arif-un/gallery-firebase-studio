@@ -264,14 +264,7 @@ export default function GalleryPage() {
       setLayouts({ lg: derivedInitialLayoutsLg });
       defaultsInitializedRef.current = true; 
     }
-  }, []); 
-
-  const calculateInitialLayoutItem = useCallback((
-    image: UploadedImage,
-    existingLayout: Layout[] = [] 
-  ): Layout => {
-    return generateLayoutItem(image, existingLayout, DEFAULT_ITEM_WIDTH, COLS.lg);
-  }, []); 
+  }, []);   
 
   const handleUploads = useCallback((newImages: UploadedImage[]) => {
     setImages(prevImages => {
@@ -413,25 +406,25 @@ export default function GalleryPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col items-center p-4 md:p-8 transition-colors duration-300">
-      <header className="w-full max-w-6xl mb-8 flex justify-between items-center">
+      <header className="w-full max-w-7xl mb-8 flex justify-between items-center">
         <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary animate-fade-in-down">
-          Gallery
+          
         </h1>
         <Button onClick={toggleTheme} variant="ghost" size="icon" aria-label="Toggle theme">
           {theme === 'light' ? <Moon className="h-6 w-6" /> : <Sun className="h-6 w-6" />}
         </Button>
       </header>
 
-      <main className="w-full max-w-6xl flex flex-col gap-8">
-        <section aria-labelledby="upload-heading" className="frosted-glass rounded-xl p-4 sm:p-6 animate-fade-in-up">
+      <main className="w-full max-w-7xl flex flex-col gap-8">
+        <section aria-labelledby="upload-heading" className="p-4 sm:p-6 animate-fade-in-up">
           <h2 id="upload-heading" className="text-2xl font-semibold mb-4 text-slate-500">
             Upload Your Masterpieces
           </h2>
           <ImageUploader onUploadComplete={handleUploads} />
         </section>
 
-        <section aria-labelledby="gallery-heading" className="frosted-glass rounded-xl p-4 sm:p-6 min-h-[400px] animate-fade-in-up animation-delay-200">
-          <div className="flex justify-between items-center mb-4">
+        <section aria-labelledby="gallery-heading" className=" w-full min-h-[400px] animate-fade-in-up animation-delay-200">
+          <div className="flex justify-between items-center mb-6 mx-2">
             <h2 id="gallery-heading" className="text-2xl font-semibold text-primary">
               Gallery
             </h2>
@@ -462,14 +455,14 @@ export default function GalleryPage() {
            <DialogTitle className="sr-only">{previewImage.name}</DialogTitle>
           <DialogContent className={cn(
             "p-0 m-0 w-screen h-screen max-w-none border-none rounded-none flex items-center justify-center outline-none ring-0 focus:ring-0",
-            "frosted-glass shadow-2xl" 
-            )}>
+            " shadow-2xl" 
+          )}>
             <div className="relative flex flex-col items-center justify-center w-full h-full p-4">
               <DialogClose asChild>
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="absolute top-4 right-4 z-50 text-white rounded-full p-2 bg-black/20 hover:bg-black/30 backdrop-blur-lg border-2 border-white/5"
+                  className="absolute top-4 right-4 z-50 text-white rounded-full p-2 frosted-glass-dark"
                   aria-label="Close preview"
                 >
                   <X className="h-6 w-6" />
@@ -482,7 +475,7 @@ export default function GalleryPage() {
                     variant="ghost"
                     size="icon"
                     onClick={handlePrevPreview}
-                    className="absolute left-2 sm:left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full text-white transition-all bg-black/20 hover:bg-black/40 backdrop-blur-lg border-2 border-white/5"
+                    className="absolute left-2 sm:left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full text-white transition-all frosted-glass-dark"
                     aria-label="Previous image"
                   >
                     <ChevronLeft className="h-8 w-8 sm:h-10 sm:w-10" />
@@ -492,8 +485,7 @@ export default function GalleryPage() {
                 <div className="relative w-3/4 max-h-[calc(100vh_-_12rem)]">
                   <div className={cn(
                     "relative w-full h-full p-2 rounded-xl overflow-hidden",
-                    "bg-black/20 dark:bg-white/10 backdrop-blur-md", 
-                    "shadow-2xl border border-white/5" 
+                    "frosted-glass-dark"
                   )}>
                     <Image
                       key={previewImage.id}
@@ -515,7 +507,7 @@ export default function GalleryPage() {
                     variant="ghost"
                     size="icon"
                     onClick={handleNextPreview}
-                    className="absolute right-2 sm:right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full text-white transition-all bg-black/20 hover:bg-black/40 backdrop-blur-lg border-2 border-white/5"
+                    className="absolute right-2 sm:right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full text-white transition-all frosted-glass-dark"
                     aria-label="Next image"
                   >
                     <ChevronRight className="h-8 w-8 sm:h-10 sm:w-10" />
@@ -533,8 +525,8 @@ export default function GalleryPage() {
                         "relative rounded-md overflow-hidden transition-all duration-200 ease-in-out aspect-square",
                         "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black/50", 
                         thumbImage.id === previewImage.id
-                          ? "w-20 h-20 sm:w-24 sm:h-24 ring-2 ring-primary shadow-xl border-2 border-primary" 
-                          : "w-14 h-14 sm:w-16 sm:h-16 opacity-70 hover:opacity-100 hover:scale-105 border-2 border-white/5 hover:border-gray-400" 
+                          ? "w-20 h-20 sm:w-24 sm:h-24 ring-2 ring-primary shadow-xl frosted-glass-dark" 
+                          : "w-14 h-14 sm:w-16 sm:h-16 opacity-70 hover:opacity-100 hover:scale-105 frosted-glass-dark" 
                       )}
                       aria-label={`View image ${thumbImage.name}`}
                     >

@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -70,7 +69,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
             <Button
               variant="ghost"
               size="icon"
-              className="absolute top-2 right-2 z-10 text-white/80 opacity-0 group-hover:opacity-100 transition-opacity rounded-full p-2 h-8 w-8 flex items-center justify-center bg-black/20 hover:bg-destructive/80 hover:text-destructive-foreground backdrop-blur-lg border-2 border-white/5"
+              className="absolute top-2 right-2 z-10 text-white/80 opacity-0 group-hover:opacity-100 transition-opacity rounded-full p-2 h-8 w-8 flex items-center justify-center frosted-glass-dark"
               onClick={(e) => {
                 e.stopPropagation(); 
                 onImageRemove(image.id);
@@ -83,7 +82,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
             <Button
               variant="ghost"
               size="icon"
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 text-white/90 opacity-0 group-hover:opacity-100 transition-all rounded-full p-3 h-12 w-12 flex items-center justify-center bg-black/20 hover:bg-primary/80 backdrop-blur-lg border-2 border-white/5"
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 text-white/90 opacity-0 group-hover:opacity-100 transition-all rounded-full p-3 h-12 w-12 flex items-center justify-center frosted-glass-dark"
               onClick={(e) => { e.stopPropagation(); onImagePreview(image.id); }}
               aria-label={`Preview ${image.name}`}
             >
@@ -91,7 +90,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({ images, layouts, onLayoutChange, 
             </Button>
 
             <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 z-10">
-              <div className="px-3 py-1 rounded-full bg-black/20 backdrop-blur-lg border-2 border-white/5">
+              <div className="px-3 py-1 rounded-full frosted-glass-dark">
                 <span className="text-white text-xs sm:text-sm font-semibold truncate">{image.name}</span>
               </div>
             </div>
