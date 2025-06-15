@@ -482,10 +482,9 @@ export default function GalleryPage() {
                   </Button>
                 )}
                 
-                <div className="relative w-3/4 max-h-[calc(100vh_-_12rem)]">
+                <div className="relative w-1/2 max-h-[calc(100vh_-_10rem)]">
                   <div className={cn(
-                    "relative w-full h-full p-2 rounded-xl overflow-hidden",
-                    "frosted-glass-dark"
+                    "relative w-full h-full p-3 rounded-3xl bg-black/20 dark:bg-white/20 overflow-hidden mt-10 backdrop-blur-lg",
                   )}>
                     <Image
                       key={previewImage.id}
@@ -493,7 +492,7 @@ export default function GalleryPage() {
                       alt={previewImage.name}
                       width={previewImage.width}
                       height={previewImage.height}
-                      className="block object-contain rounded-lg w-full h-auto" 
+                      className="block object-contain rounded-2xl w-full h-auto" 
                       sizes="(max-width: 768px) 75vw, 75vw"
                       data-ai-hint={previewImage.aiHint}
                       unoptimized 
