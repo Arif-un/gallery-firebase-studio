@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Sun, Moon, ChevronLeft, ChevronRight, X, Shuffle as ShuffleIcon } from 'lucide-react';
 import { Dialog, DialogContent, DialogClose, DialogTitle } from '@/components/ui/dialog';
 import Image from 'next/image';
-import { cn } from '@/lib/utils';
+import { cn, generateBentoGrid, validateAndFillGrid } from '@/lib/utils';
 
 const DEFAULT_ITEM_WIDTH = 4; 
 const COLS = { lg: 32, md: 24, sm: 16, xs: 12, xxs: 10 };
@@ -67,11 +67,173 @@ const initialImages: UploadedImage[] = defaultImagesSeed.map((img, index) => ({
 }));
 
 let tempCurrentLayoutForInit: Layout[] = [];
-const initialLayoutsLg: Layout[] = initialImages.map(img => {
-  const layoutItem = generateLayoutItem(img, tempCurrentLayoutForInit, DEFAULT_ITEM_WIDTH, COLS.lg);
-  tempCurrentLayoutForInit.push(layoutItem);
-  return layoutItem;
-});
+const initialLayoutsLg: Layout[] =[
+  {
+      "w": 5,
+      "h": 7,
+      "x": 0,
+      "y": 13,
+      "i": "default-image-1",
+      "minW": 4,
+      "minH": 2,
+      "moved": false,
+      "static": false
+  },
+  {
+      "w": 8,
+      "h": 6,
+      "x": 22,
+      "y": 10,
+      "i": "default-image-2",
+      "minW": 4,
+      "minH": 2,
+      "moved": false,
+      "static": false
+  },
+  {
+      "w": 4,
+      "h": 5,
+      "x": 26,
+      "y": 3,
+      "i": "default-image-3",
+      "minW": 4,
+      "minH": 2,
+      "moved": false,
+      "static": false
+  },
+  {
+      "w": 7,
+      "h": 3,
+      "x": 25,
+      "y": 0,
+      "i": "default-image-4",
+      "minW": 4,
+      "minH": 2,
+      "moved": false,
+      "static": false
+  },
+  {
+      "w": 10,
+      "h": 6,
+      "x": 10,
+      "y": 0,
+      "i": "default-image-5",
+      "minW": 4,
+      "minH": 2,
+      "moved": false,
+      "static": false
+  },
+  {
+      "w": 5,
+      "h": 3,
+      "x": 20,
+      "y": 0,
+      "i": "default-image-6",
+      "minW": 4,
+      "minH": 2,
+      "moved": false,
+      "static": false
+  },
+  {
+      "w": 7,
+      "h": 8,
+      "x": 17,
+      "y": 16,
+      "i": "default-image-7",
+      "minW": 4,
+      "minH": 2,
+      "moved": false,
+      "static": false
+  },
+  {
+      "w": 6,
+      "h": 5,
+      "x": 20,
+      "y": 3,
+      "i": "default-image-8",
+      "minW": 4,
+      "minH": 2,
+      "moved": false,
+      "static": false
+  },
+  {
+      "w": 7,
+      "h": 2,
+      "x": 22,
+      "y": 8,
+      "i": "default-image-9",
+      "minW": 4,
+      "minH": 2,
+      "moved": false,
+      "static": false
+  },
+  {
+      "w": 10,
+      "h": 7,
+      "x": 12,
+      "y": 8,
+      "i": "default-image-10",
+      "minW": 4,
+      "minH": 2,
+      "moved": false,
+      "static": false
+  },
+  {
+      "w": 12,
+      "h": 7,
+      "x": 0,
+      "y": 6,
+      "i": "default-image-11",
+      "minW": 4,
+      "minH": 2,
+      "moved": false,
+      "static": false
+  },
+  {
+      "w": 10,
+      "h": 6,
+      "x": 0,
+      "y": 0,
+      "i": "default-image-12",
+      "minW": 4,
+      "minH": 2,
+      "moved": false,
+      "static": false
+  },
+  {
+      "w": 12,
+      "h": 4,
+      "x": 5,
+      "y": 15,
+      "i": "default-image-13",
+      "minW": 4,
+      "minH": 2,
+      "moved": false,
+      "static": false
+  },
+  {
+      "w": 10,
+      "h": 5,
+      "x": 5,
+      "y": 19,
+      "i": "default-image-14",
+      "minW": 4,
+      "minH": 2,
+      "moved": false,
+      "static": false
+  },
+  {
+      "w": 6,
+      "h": 5,
+      "x": 24,
+      "y": 16,
+      "i": "default-image-15",
+      "minW": 4,
+      "minH": 2,
+      "moved": false,
+      "static": false
+  }
+]
 
 
 export default function IGalleryPage() {
@@ -177,52 +339,20 @@ export default function IGalleryPage() {
     });
   }, [images]);
 
+
  const handleShuffle = useCallback(() => {
     if (images.length === 0) return;
-
-    const shuffledImagesData = [...images].sort(() => Math.random() - 0.5);
+    const shuffledImagesData = [...images].sort(() => Math.random() - 0.5).map((itm, i ) => ({...itm, id:`default-image-${i+1}`}))
     setImages(shuffledImagesData); 
 
-    const newLgLayout: Layout[] = [];
-    const numCols = COLS.lg;
-    const maxW = Math.max(MIN_RANDOM_W, Math.floor(numCols * MAX_RANDOM_W_FACTOR));
-    const columnHeights = Array(numCols).fill(0);
+    
+    let  newLgLayout: Layout[] = generateBentoGrid(shuffledImagesData.length);
+    newLgLayout = validateAndFillGrid(newLgLayout, 32)
 
-    for (const image of shuffledImagesData) {
-      const itemW = Math.floor(Math.random() * (maxW - MIN_RANDOM_W + 1)) + MIN_RANDOM_W;
-      const itemH = Math.floor(Math.random() * (MAX_RANDOM_H - MIN_RANDOM_H + 1)) + MIN_RANDOM_H;
-
-      let bestX = 0; // Default to 0, will be updated
-      let bestY = Infinity;
-
-      for (let x_coord = 0; x_coord <= numCols - itemW; x_coord++) {
-        let currentMaxYInWindow = 0;
-        for (let i = 0; i < itemW; i++) {
-          currentMaxYInWindow = Math.max(currentMaxYInWindow, columnHeights[x_coord + i]);
-        }
-
-        if (currentMaxYInWindow < bestY) {
-          bestY = currentMaxYInWindow;
-          bestX = x_coord;
-        }
-      }
-      
-      newLgLayout.push({
-        i: image.id,
-        x: bestX,
-        y: bestY,
-        w: itemW,
-        h: itemH,
-        minW: MIN_RANDOM_W, 
-        minH: MIN_RANDOM_H,
-      });
-
-      for (let i = 0; i < itemW; i++) {
-        columnHeights[bestX + i] = bestY + itemH;
-      }
-    }
     setLayouts({ lg: newLgLayout });
   }, [images]);
+
+  console.log({layouts})
 
 
   const handleOpenPreview = useCallback((imageId: string) => {
