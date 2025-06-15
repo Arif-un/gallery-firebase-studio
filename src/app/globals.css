@@ -51,6 +51,9 @@ body {
 .react-grid-item {
   @apply transition-all duration-200 ease-in-out;
 }
+.react-grid-item img {
+  @apply will-change-[filter] transition-[filter] duration-300 ease-in-out;
+}
 .react-grid-item.cssTransforms {
   @apply transition-transform duration-200 ease-in-out;
 }
@@ -171,6 +174,19 @@ body {
 
 .animation-delay-400 { 
   animation-delay: 0.4s; 
+}
+
+/* Custom hover effects */
+.parent-group:hover .react-grid-item:not(:hover) img {
+  /* @apply brightness-20; */
+}
+
+.react-grid-item:hover img {
+  @apply blur-sm brightness-50;
+}
+
+.react-grid-item:hover .group-hover-elements {
+  @apply opacity-100;
 }
     
 
