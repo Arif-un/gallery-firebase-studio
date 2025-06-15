@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
@@ -295,27 +294,22 @@ export default function GalleryPage() {
     setImages(prevImages => {
       const updatedImages = [...prevImages];
       const uniqueNewImages = newImages.filter(img => !prevImages.some(pi => pi.id === img.id));
-      updatedImages.push(...uniqueNewImages);
-      return updatedImages;
+      // Place new images at the beginning
+      return [...uniqueNewImages, ...updatedImages].map((img, index) => ({...img, id: `default-image-${index + 1}`}));
     });
 
     setLayouts(prevLayouts => {
       const newLayoutsState: Layouts = { ...prevLayouts };
-      let currentLgLayoutForNewItemsCalculation = newLayoutsState.lg ? [...newLayoutsState.lg] : [];
-      const itemsLayoutToAdd: Layout[] = [];
-      newImages.forEach(img => {
-        if (!currentLgLayoutForNewItemsCalculation.find(item => item.i === img.id)) {
-            const newLayoutItem = calculateInitialLayoutItem(img, currentLgLayoutForNewItemsCalculation);
-            itemsLayoutToAdd.push(newLayoutItem);
-            currentLgLayoutForNewItemsCalculation.push(newLayoutItem); 
-        }
-      });
+      const currentImages = [...newImages, ...images];
       
-      if (!newLayoutsState.lg) newLayoutsState.lg = [];
-      newLayoutsState.lg = [...newLayoutsState.lg, ...itemsLayoutToAdd];
-      return newLayoutsState;
+      // Generate new layout for all images
+      let newLgLayout: Layout[] = generateBentoGrid(currentImages.length);
+      newLgLayout = validateAndFillGrid(newLgLayout, 32);
+      // Update the layouts state with the new layout
+      newLayoutsState.lg = newLgLayout;
+      return structuredClone( newLayoutsState);
     });
-  }, [calculateInitialLayoutItem]);
+  }, [images]);
 
   const onLayoutChange = useCallback((currentLayout: Layout[], allLayouts: Layouts) => {
     if (JSON.stringify(allLayouts) !== JSON.stringify(layouts)) {
@@ -351,8 +345,6 @@ export default function GalleryPage() {
 
     setLayouts({ lg: newLgLayout });
   }, [images]);
-
-  console.log({layouts})
 
 
   const handleOpenPreview = useCallback((imageId: string) => {
