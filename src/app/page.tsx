@@ -6,7 +6,7 @@ import type { Layout, Layouts } from 'react-grid-layout';
 import ImageUploader from '@/components/ImageUploader';
 import ImageGrid from '@/components/ImageGrid';
 import { Button } from '@/components/ui/button';
-import { Sun, Moon, ChevronLeft, ChevronRight, X, Shuffle as ShuffleIcon } from 'lucide-react';
+import { Sun, Moon, ChevronLeft, ChevronRight, X, Shuffle as ShuffleIcon, Grid3X3, Grid2X2, Grid, Dot } from 'lucide-react';
 import { Dialog, DialogContent, DialogClose, DialogTitle } from '@/components/ui/dialog';
 import Image from 'next/image';
 import { cn, generateBentoGrid, validateAndFillGrid } from '@/lib/utils';
@@ -425,9 +425,12 @@ export default function GalleryPage() {
 
         <section aria-labelledby="gallery-heading" className=" w-full min-h-[400px] animate-fade-in-up animation-delay-200">
           <div className="flex justify-between items-center mb-6 mx-2">
-            <h2 id="gallery-heading" className="text-2xl font-semibold text-primary">
+           <div className='flex gap-3 items-center'>
+           <h2 id="gallery-heading" className="text-2xl font-semibold text-primary">
               Gallery
             </h2>
+            <h6 className='flex items-center text-xs text-slate-500'><Dot className='size-9 text-green-500'/> Drag & Resize Enabled</h6>
+           </div>
             {images.length > 0 && (
               <Button variant="outline" onClick={handleShuffle} size="sm">
                 <ShuffleIcon className="mr-2 h-4 w-4" /> Shuffle
